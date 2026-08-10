@@ -94,7 +94,7 @@ def desenhar_diagrama(res, tipo_diagrama):
     fig.update_layout(scene=dict(xaxis_title='X (m)', yaxis_title='Y (m)', zaxis_title='Z (m)', aspectmode='data'), margin=dict(l=0, r=0, b=0, t=0), height=600)
     return fig
 
-def gerar_relatorio_txt(dados, res_analise, resultados_comp, tudo_aprovado):
+def gerar_relatorio_txt(dados, res_analise, resultados_comp, tudo_aprovado, tolerancia):
     data_atual = datetime.now().strftime("%d/%m/%Y às %H:%M")
     status_global = "APROVADA" if tudo_aprovado else "REPROVADA (Requer revisão de perfis)"
     
@@ -108,6 +108,7 @@ def gerar_relatorio_txt(dados, res_analise, resultados_comp, tudo_aprovado):
 =========================================================
 Data de Geração: {data_atual}
 Status Global da Estrutura: {status_global}
+Tolerância de Aprovação Aplicada: +{tolerancia:.1f}%
 
 1. DADOS GEOMÉTRICOS E DE CONTORNO
 ---------------------------------------------------------
@@ -162,7 +163,7 @@ Coeficiente de Minoração (γ_a1) = {gamma_a1}
         d = perf['d'] / 10.0
         tw = perf['tw'] / 10.0
         Av = d * tw
-        status_comp = "APROVADO" if v['aprovado'] else "REPROVADO"
+        status_comp = "APROVADO (COM TOLERÂNCIA)" if v['aprovado'] and v['taxa_maxima'] > 100.0 else ("APROVADO" if v['aprovado'] else "REPROVADO")
 
         relatorio += f"[{v['componente'].upper()}]\n  Perfil Selecionado: {v['perfil']} ({v['familia']})\n"
         relatorio += f"  A. ESFORÇOS ATUANTES MÁXIMOS EM MÓDULO ABSOLUTO (Sd)\n     N_Sd = {v['N_sd']:.2f} kN | V_Sd = {v['V_sd']:.2f} kN | M_Sd = {v['M_sd']:.2f} kNm\n\n"
@@ -178,7 +179,7 @@ Coeficiente de Minoração (γ_a1) = {gamma_a1}
         relatorio += f"  >> STATUS DA PEÇA: {status_comp} (Taxa Máxima: {v['taxa_maxima']:.1f}%)\n.........................................................\n\n"
     return relatorio
 
-def gerar_relatorio_pdf(texto_memoria, res_analise=None):
+def gerar_relatorio_pdf(texto_memoria, res_analise=None, incluir_graficos=False):
     if FPDF is None: return None
     pdf = FPDF()
     pdf.add_page()
@@ -186,7 +187,7 @@ def gerar_relatorio_pdf(texto_memoria, res_analise=None):
     for linha in texto_memoria.split('\n'):
         pdf.multi_cell(0, 5, txt=linha.encode('latin-1', 'replace').decode('latin-1'))
         
-    if res_analise:
+    if res_analise and incluir_graficos:
         try:
             pdf.add_page()
             pdf.set_font("Courier", 'B', 12)
@@ -210,19 +211,14 @@ def gerar_relatorio_pdf(texto_memoria, res_analise=None):
                     os.unlink(tmp_path)
                     
         except Exception as e:
-            pdf.multi_cell(0, 5, txt=f"\n[Aviso: Não foi possível gerar os diagramas no PDF. Verifique a instalação do 'kaleido'. Detalhe: {e}]")
+            pdf.multi_cell(0, 5, txt=f"\n[Aviso: Não foi possível gerar os diagramas no PDF. Servidor sem suporte ao 'kaleido' ou timeout. Detalhe: {e}]")
 
     out = pdf.output(dest='S')
     return out.encode('latin-1') if isinstance(out, str) else bytes(out)
 
 def obter_propriedades(nome_perfil):
     p = CATALOGO_COMPLETO[nome_perfil]
-    return {
-        "A": p["A"] * 1e-4,          
-        "Iy": p["Ix"] * 1e-8, 
-        "Iz": p["Iy"] * 1e-8,  
-        "J": (p["Iy"] * 1e-8) / 2.0  
-    }
+    return {"A": p["A"] * 1e-4, "Iy": p["Ix"] * 1e-8, "Iz": p["Iy"] * 1e-8, "J": (p["Iy"] * 1e-8) / 2.0}
 
 def main():
     st.title("🏗️ Dimensionamento de Estruturas Metálicas 3D")
@@ -283,8 +279,11 @@ def main():
         mapa_perfis = {"Pilares Metálicos": perf_pil, "Terças de Cobertura": perf_terca, "Banzo Superior": perf_bz_sup, "Banzo Inferior": perf_bz_inf, "Diagonais": perf_diag, "Montantes": perf_mont}
 
     st.sidebar.markdown("---")
+    st.sidebar.subheader("⚖️ Segurança e Aceitação")
     apoios_base = st.sidebar.selectbox("Vínculos na Base / Apoios", ["Engastado (Trava Translações e Rotações)", "Articulado (Trava apenas Translações)"])
-    
+    tolerancia_aceitacao = st.sidebar.number_input("Tolerância de Aceitação Máxima [%]", min_value=0.0, max_value=20.0, value=2.0, step=0.5)
+    st.sidebar.caption("Ex: Uma taxa de 102% será APROVADA caso a tolerância seja 2%.")
+
     st.sidebar.markdown("---")
     st.sidebar.subheader("🌪️ Cargas / Vento")
     if sistema_principal == "Mezanino / Passarela Metálica":
@@ -484,7 +483,7 @@ def main():
             fig.add_trace(go.Scatter3d(x=[x1, x2], y=[y1, y2], z=[z1, z2], mode='lines', line=dict(color=line_color, width=line_width), showlegend=False))
             
         fig.update_layout(scene=dict(xaxis_title='X (m)', yaxis_title='Y (m)', zaxis_title='Z (m)', aspectmode='data'), margin=dict(l=0, r=0, b=0, t=0), height=550)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig)
 
     with tab2:
         st.subheader("🌪️ Detalhamento de Cargas (ELU)")
@@ -535,8 +534,14 @@ def main():
                 v["D_sd"] = esf_grp["d_max"]
                 v["fator"] = 1.0
                 
+                # APLICAÇÃO DA TOLERÂNCIA ESCOLHIDA PELO USUÁRIO (Ex: 102% passa se tolerância for 2%)
+                if v["taxa_maxima"] <= (100.0 + tolerancia_aceitacao):
+                    v["aprovado"] = True
+                else:
+                    v["aprovado"] = False
+                    tudo_aprovado = False
+
                 resultados_comp.append(v)
-                if not v["aprovado"]: tudo_aprovado = False
 
             if tudo_aprovado: st.success("### 🎉 TODOS OS PERFIS FORAM APROVADOS!")
             elif len(resultados_comp) > 0: st.error("### ❌ HÁ PERFIS REPROVADOS!")
@@ -550,20 +555,25 @@ def main():
                     "g_total": g_total, "q_sobre": q_sobre, "q_elu": q_elu, "tipo_aco": tipo_aco, 
                     "q_vento_liquido": q_vento_liquido, "tipo_piso": tipo_piso if sistema_principal == "Mezanino / Passarela Metálica" else "N/A"
                 }
-                texto_memoria = gerar_relatorio_txt(dados_r, res, resultados_comp, tudo_aprovado)
+                texto_memoria = gerar_relatorio_txt(dados_r, res, resultados_comp, tudo_aprovado, tolerancia_aceitacao)
                 
-                col_d1, col_d2 = st.columns(2)
-                with col_d1: st.download_button("📄 Baixar TXT", data=texto_memoria, file_name="Calculo.txt", use_container_width=True)
+                col_d1, col_d2, col_d3 = st.columns([1.5, 1.5, 2])
+                with col_d1: st.download_button("📄 Baixar TXT", data=texto_memoria, file_name="Calculo.txt")
                 with col_d2:
                     if FPDF is not None:
-                        # Quando o botão é clicado, tenta embutir os diagramas
-                        st.download_button("📥 Baixar PDF com Anexos 3D", data=gerar_relatorio_pdf(texto_memoria, res), file_name="Calculo_Detalhado.pdf", mime="application/pdf", type="primary", use_container_width=True)
+                        # Criando uma opção visual para não travar a nuvem de ninguém com o PDF
+                        incluir_img = col_d3.checkbox("Anexar Imagens 3D no PDF (Pode causar erro/lentidão na nuvem)")
+                        
+                        st.download_button("📥 Baixar PDF", data=gerar_relatorio_pdf(texto_memoria, res, incluir_img), file_name="Calculo_Detalhado.pdf", mime="application/pdf", type="primary")
 
                 st.markdown("---")
                 for v in resultados_comp:
                     st.write(f"#### 🔹 {v['componente']} — `{v['perfil']}`")
                     c1, c2, c3, c4, c5 = st.columns(5)
-                    c1.metric("Status", "✅ Ok" if v['aprovado'] else "❌ Reprovado")
+                    
+                    status_text = "✅ Ok" if v['taxa_maxima'] <= 100 else ("⚠️ Ok (Tolerado)" if v['aprovado'] else "❌ Reprovado")
+                    
+                    c1.metric("Status", status_text)
                     c2.metric("Taxa", f"{v['taxa_maxima']:.1f}%")
                     c3.metric("Momento (Msd/Mrd)", f"{v['ratio_M']:.1f}%")
                     c4.metric("Normal (Nsd/Nrd)", f"{v['ratio_N']:.1f}%")
@@ -574,7 +584,7 @@ def main():
     with tab5:
         if st.session_state.res_analise and st.session_state.res_analise.get("sucesso"):
             tipo_diagrama = st.selectbox("Visualizar:", ["Deslocamentos (Deformada)", "Esforço Normal (Tração/Compressão)", "Esforço Cortante (Vz)", "Momento Fletor (My)", "Reações de Apoio"])
-            st.plotly_chart(desenhar_diagrama(st.session_state.res_analise, tipo_diagrama), use_container_width=True)
+            st.plotly_chart(desenhar_diagrama(st.session_state.res_analise, tipo_diagrama))
 
 if __name__ == "__main__":
     main()
