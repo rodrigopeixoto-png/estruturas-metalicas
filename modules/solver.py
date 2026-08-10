@@ -2,7 +2,7 @@ import numpy as np
 
 class MotorCalculo3D:
     def __init__(self):
-        self.E = 200e6  # kPa (200 GPa)
+        self.E = 210e6  # kPa (200 GPa)
         self.G = 77e6   # kPa (77 GPa)
         self.nos = []
         self.barras = []
@@ -23,13 +23,24 @@ class MotorCalculo3D:
             else:
                 self.apoios.extend([i*6 + dof for dof in range(3)])
 
-    def _get_T(self, dx, dy, dz, L):
+    def _get_T(self, dx, dy, dz, L, ang_graus=0.0):
         cx, cy, cz = dx/L, dy/L, dz/L
         if abs(cx) < 1e-4 and abs(cy) < 1e-4: 
             r3x3 = np.array([[0, 0, cz], [0, 1, 0], [-cz, 0, 0]])
         else:
             D = np.sqrt(cx**2 + cy**2)
             r3x3 = np.array([[cx, cy, cz], [-cy/D, cx/D, 0], [-cx*cz/D, -cy*cz/D, D]])
+            
+        # O PULO DO GATO: Rotaciona a seção transversal da peça no seu próprio eixo longitudinal
+        if ang_graus != 0.0:
+            ang_rad = np.radians(ang_graus)
+            R_loc = np.array([
+                [1, 0, 0],
+                [0, np.cos(ang_rad), np.sin(ang_rad)],
+                [0, -np.sin(ang_rad), np.cos(ang_rad)]
+            ])
+            r3x3 = R_loc @ r3x3
+
         T = np.zeros((12, 12))
         for b in range(4): T[b*3:(b+1)*3, b*3:(b+1)*3] = r3x3
         return T, r3x3
@@ -37,6 +48,7 @@ class MotorCalculo3D:
     def _matriz_elemento_3d(self, barra):
         n1, n2 = barra['n1'], barra['n2']
         A, Iy, Iz, J = barra['A'], barra['Iy'], barra['Iz'], barra['J']
+        ang = barra.get('ang', 0.0)
         
         x1, y1, z1 = self.nos[n1]
         x2, y2, z2 = self.nos[n2]
@@ -71,7 +83,7 @@ class MotorCalculo3D:
         k_loc[4, 4] = k_loc[10, 10] = k4_Iy
         k_loc[4, 10] = k_loc[10, 4] = k2_Iy
 
-        T, R = self._get_T(dx, dy, dz, L)
+        T, R = self._get_T(dx, dy, dz, L, ang)
         k_glob = T.T @ k_loc @ T
         return k_glob, k_loc, T, R, L
 
@@ -84,6 +96,7 @@ class MotorCalculo3D:
         for i, barra in enumerate(self.barras):
             n1, n2 = barra['n1'], barra['n2']
             z1, z2 = self.nos[n1][2], self.nos[n2][2]
+            ang = barra.get('ang', 0.0)
             
             is_vertical = abs(z1 - z2) > 1e-2 and abs(self.nos[n1][0] - self.nos[n2][0]) < 1e-2 and abs(self.nos[n1][1] - self.nos[n2][1]) < 1e-2
             
@@ -93,9 +106,9 @@ class MotorCalculo3D:
                 L = np.sqrt((x2-x1)**2 + (y2-y1)**2 + (z2-z1)**2)
                 if L == 0: continue
                 
-                T, R = self._get_T(x2-x1, y2-y1, z2-z1, L)
+                T, R = self._get_T(x2-x1, y2-y1, z2-z1, L, ang)
                 q_glob = np.array([0, 0, -q_linear])
-                q_loc = R @ q_glob
+                q_loc = R @ q_glob  # A gravidade agora interage perfeitamente com o giro local da barra
                 qx, qy, qz = q_loc
                 
                 fef_loc = np.zeros(12)
@@ -149,8 +162,8 @@ class MotorCalculo3D:
             for b in self.barras:
                 if b['grupo'] not in esforcos_grupos:
                     esforcos_grupos[b['grupo']] = {
-                        "n_max": 0.0, "v_max": 0.0, "m_max": 0.0, "d_max": 0.0,
-                        "n_pos": -1e9, "n_neg": 1e9, "v_pos": -1e9, "v_neg": 1e9, "m_pos": -1e9, "m_neg": 1e9
+                        "n_max": 0.0, "v_max": 0.0, "my_max": 0.0, "mz_max": 0.0, "d_max": 0.0,
+                        "n_pos": -1e9, "n_neg": 1e9, "v_pos": -1e9, "v_neg": 1e9, "my_pos": -1e9, "my_neg": 1e9, "mz_pos": -1e9, "mz_neg": 1e9
                     }
 
             for i, barra in enumerate(self.barras):
@@ -178,9 +191,9 @@ class MotorCalculo3D:
 
                 n_abs_max = max(abs(N1), abs(N2))
                 v_abs_max = max(abs(Vy1), abs(Vy2), abs(Vz1), abs(Vz2))
-                m_abs_max = max(abs(My1), abs(My2), abs(Mz1), abs(Mz2))
+                my_abs_max = max(abs(My1), abs(My2))
+                mz_abs_max = max(abs(Mz1), abs(Mz2))
                 
-                # Deslocamento local interno da barra sob carga distribuída
                 d_bow = 0.0
                 if i in self.fef_local:
                     L = np.sqrt((self.nos[n2][0]-self.nos[n1][0])**2 + (self.nos[n2][1]-self.nos[n1][1])**2 + (self.nos[n2][2]-self.nos[n1][2])**2)
@@ -194,16 +207,18 @@ class MotorCalculo3D:
 
                 esforcos_grupos[grp]["n_max"] = max(esforcos_grupos[grp]["n_max"], n_abs_max)
                 esforcos_grupos[grp]["v_max"] = max(esforcos_grupos[grp]["v_max"], v_abs_max)
-                esforcos_grupos[grp]["m_max"] = max(esforcos_grupos[grp]["m_max"], m_abs_max)
+                esforcos_grupos[grp]["my_max"] = max(esforcos_grupos[grp]["my_max"], my_abs_max)
+                esforcos_grupos[grp]["mz_max"] = max(esforcos_grupos[grp]["mz_max"], mz_abs_max)
                 esforcos_grupos[grp]["d_max"] = max(esforcos_grupos[grp]["d_max"], d_max)
 
-                # Rastreio de sinais para o relatório (Legenda Máx e Mín)
                 esforcos_grupos[grp]["n_pos"] = max(esforcos_grupos[grp]["n_pos"], N1, N2)
                 esforcos_grupos[grp]["n_neg"] = min(esforcos_grupos[grp]["n_neg"], N1, N2)
                 esforcos_grupos[grp]["v_pos"] = max(esforcos_grupos[grp]["v_pos"], Vz1, Vz2)
                 esforcos_grupos[grp]["v_neg"] = min(esforcos_grupos[grp]["v_neg"], Vz1, Vz2)
-                esforcos_grupos[grp]["m_pos"] = max(esforcos_grupos[grp]["m_pos"], My1, My2)
-                esforcos_grupos[grp]["m_neg"] = min(esforcos_grupos[grp]["m_neg"], My1, My2)
+                esforcos_grupos[grp]["my_pos"] = max(esforcos_grupos[grp]["my_pos"], My1, My2)
+                esforcos_grupos[grp]["my_neg"] = min(esforcos_grupos[grp]["my_neg"], My1, My2)
+                esforcos_grupos[grp]["mz_pos"] = max(esforcos_grupos[grp]["mz_pos"], Mz1, Mz2)
+                esforcos_grupos[grp]["mz_neg"] = min(esforcos_grupos[grp]["mz_neg"], Mz1, Mz2)
 
             F_total = K_global @ U_completo
             reacoes = {}
@@ -215,7 +230,7 @@ class MotorCalculo3D:
 
             global_n = max([v["n_max"] for k, v in esforcos_grupos.items()]) if esforcos_grupos else 0.0
             global_v = max([v["v_max"] for k, v in esforcos_grupos.items()]) if esforcos_grupos else 0.0
-            global_m = max([v["m_max"] for k, v in esforcos_grupos.items()]) if esforcos_grupos else 0.0
+            global_m = max([v["my_max"] for k, v in esforcos_grupos.items()]) if esforcos_grupos else 0.0
             global_d = max([v["d_max"] for k, v in esforcos_grupos.items()]) if esforcos_grupos else 0.0
 
             return {
@@ -224,7 +239,7 @@ class MotorCalculo3D:
                 "esforcos": esforcos, "reacoes": reacoes, "nos": self.nos, 
                 "barras": [(b['n1'], b['n2']) for b in self.barras],
                 "esforcos_grupos": esforcos_grupos,
-                "deslocamentos_nodais": U_completo.tolist() # Exportando vetor 3D completo p/ desenho
+                "deslocamentos_nodais": U_completo.tolist()
             }
         except Exception as e:
             return {"sucesso": False, "erro": str(e)}
