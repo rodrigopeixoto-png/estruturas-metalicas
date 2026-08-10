@@ -107,6 +107,8 @@ def gerar_relatorio_txt(dados, res_analise, resultados_comp, tudo_aprovado, tole
       MEMÓRIA DE CÁLCULO ESTRUTURAL DETALHADA
 =========================================================
 Data de Geração: {data_atual}
+Projeto: {dados.get('nome_projeto', 'Não informado')}
+Local: {dados.get('cidade', 'Não informada')}
 Status Global da Estrutura: {status_global}
 Tolerância de Aprovação Aplicada: +{tolerancia:.1f}%
 
@@ -231,6 +233,12 @@ def main():
 
     if "res_analise" not in st.session_state:
         st.session_state.res_analise = None
+
+    # MENU LATERAL
+    st.sidebar.title("Identificação da Obra")
+    nome_projeto = st.sidebar.text_input("Nome do Projeto", value="Projeto Estrutural")
+    cidade = st.sidebar.text_input("Cidade/Local", value="")
+    st.sidebar.markdown("---")
 
     st.sidebar.title("Configurações Gerais")
     sistema_principal = st.sidebar.selectbox("Sistema Principal", ["Pórtico Alma Cheia", "Tesoura Plana (Treliçada)", "Arco", "Mezanino / Passarela Metálica"])
@@ -536,7 +544,6 @@ def main():
                 nome_perfil = mapa_perfis.get(grupo)
                 if nome_perfil is None: continue 
                 
-                # O PULO DO GATO FÍSICO: Definir o vão teórico estrutural ao invés do pedaço de malha (FEM)
                 if grupo == "Vigas Secundárias (Transversais)":
                     L_teorico = vao_x
                 elif grupo == "Vigas Principais (Longitudinais)":
@@ -582,6 +589,8 @@ def main():
             if len(resultados_comp) > 0:
                 st.markdown("---")
                 dados_r = {
+                    "nome_projeto": nome_projeto,
+                    "cidade": cidade,
                     "sistema_principal": sistema_principal, "tipo_pilar": tipo_pilar, 
                     "distribuicao_pilares": distribuicao_pilares, "vao_x": vao_x, "comp_y": comp_y, 
                     "altura_z": altura_z, "espacamento": espacamento, "espacamento_vigota": espacamento_vigota,
