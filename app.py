@@ -180,7 +180,7 @@ Coeficiente de Minoração (γ_a1) = {gamma_a1}
         relatorio += f"     Flexão Forte (M_Rd,x = {v['M_rd_x']:.2f} kNm): M_Sd,x/M_Rd,x = {v['ratio_Mx']:.1f}%\n"
         relatorio += f"     Flexão Fraca (M_Rd,y = {v['M_rd_y']:.2f} kNm): M_Sd,y/M_Rd,y = {v['ratio_My']:.1f}%\n"
         relatorio += f"     Interação Flexo-Compressão (Equação 4.14 NBR 8800): Taxa Integrada = {v.get('taxa_interacao', 0.0):.1f}%\n"
-        relatorio += f"     Flecha (δ_lim = {v['delta_lim_mm']:.1f} mm): {v['D_sd']:.2f} / {v['delta_lim_mm']:.1f} = {v['ratio_delta']:.1f}%\n\n"
+        relatorio += f"     Flecha (L_real = {v['L_real_m']:.2f} m | δ_lim = {v['delta_lim_mm']:.1f} mm): {v['D_sd']:.2f} / {v['delta_lim_mm']:.1f} = {v['ratio_delta']:.1f}%\n\n"
         relatorio += f"  >> STATUS DA PEÇA: {status_comp} (Taxa Máxima: {v['taxa_maxima']:.1f}%)\n.........................................................\n\n"
     return relatorio
 
@@ -537,6 +537,9 @@ def main():
                 nome_perfil = mapa_perfis.get(grupo)
                 if nome_perfil is None: continue 
                 
+                # NOVO: Extrai o L_max (comprimento real) da barra para calcular a flecha limite com precisão
+                L_real_grupo = esf_grp.get("L_max", vao_x)
+
                 v = verificador.verificar_elemento(
                     nome_perfil, 
                     esf_grp.get("n_max", 0.0), 
@@ -544,7 +547,7 @@ def main():
                     esf_grp.get("my_max", esf_grp.get("m_max", 0.0)), 
                     esf_grp.get("mz_max", 0.0), 
                     esf_grp.get("d_max", 0.0), 
-                    vao_x, 1.0 
+                    L_real_grupo, 1.0 
                 )
                 v["componente"] = grupo
                 v["N_sd"] = esf_grp.get("n_max", 0.0)
@@ -552,6 +555,7 @@ def main():
                 v["My_sd"] = esf_grp.get("my_max", esf_grp.get("m_max", 0.0))
                 v["Mz_sd"] = esf_grp.get("mz_max", 0.0)
                 v["D_sd"] = esf_grp.get("d_max", 0.0)
+                v["L_real_m"] = L_real_grupo
                 v["fator"] = 1.0
                 
                 if v["taxa_maxima"] <= (100.0 + tolerancia_aceitacao):
@@ -629,7 +633,7 @@ def main():
                           $M_{{Rd,y}}$ = {v.get('M_rd_y', 0):.2f} kNm ➔ $M_{{Sd,y}}$ / $M_{{Rd,y}}$ = **{v['ratio_My']:.1f}%**
                         * **Interação Flexo-Compressão Biaxial (NBR 8800 Eq. 4.14):** 
                           Taxa Integrada = **{v.get('taxa_interacao', 0):.1f}%**
-                        * **Flecha:** 
+                        * **Flecha (L_real = {v['L_real_m']:.2f} m):** 
                           $\\delta_{{real}}$ = {v['D_sd']:.2f} mm | $\\delta_{{lim}}$ = {v['delta_lim_mm']:.1f} mm ➔ $\\delta_{{real}}$ / $\\delta_{{lim}}$ = **{v['ratio_delta']:.1f}%**
                         """)
                     
