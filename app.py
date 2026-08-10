@@ -282,7 +282,6 @@ def main():
     st.sidebar.subheader("⚖️ Segurança e Aceitação")
     apoios_base = st.sidebar.selectbox("Vínculos na Base / Apoios", ["Engastado (Trava Translações e Rotações)", "Articulado (Trava apenas Translações)"])
     tolerancia_aceitacao = st.sidebar.number_input("Tolerância de Aceitação Máxima [%]", min_value=0.0, max_value=20.0, value=2.0, step=0.5)
-    st.sidebar.caption("Ex: Uma taxa de 102% será APROVADA caso a tolerância seja 2%.")
 
     st.sidebar.markdown("---")
     st.sidebar.subheader("🌪️ Cargas / Vento")
@@ -292,8 +291,8 @@ def main():
             "Uso / Sobrecarga", 
             [
                 "Escritórios / Leve (2.50 kN/m²)", "Residencial (1.50 kN/m²)", "Comercial / Lojas (3.00 kN/m²)", 
-                "Depósito Leve (4.00 kN/m²)", "Depósito Pesado (5.00 kN/m²)", "Passarela - Manutenção/Sem Público (3.00 kN/m²)", 
-                "Passarela - Acesso Público (5.00 kN/m²)", "Academias / Ginástica (5.00 kN/m²)" 
+                "Depósito Leve (4.00 kN/m²)", "Depósito Pesado (5.00 kN/m²)", "Passarela - Manutenção/Sem Público (2.50 kN/m²)", 
+                "Passarela - Acesso Público (3.00 kN/m²)", "Academias / Ginástica (5.00 kN/m²)" 
             ]
         )
         peso_piso = float(tipo_piso.split("(")[1].split(" ")[0])
@@ -483,7 +482,7 @@ def main():
             fig.add_trace(go.Scatter3d(x=[x1, x2], y=[y1, y2], z=[z1, z2], mode='lines', line=dict(color=line_color, width=line_width), showlegend=False))
             
         fig.update_layout(scene=dict(xaxis_title='X (m)', yaxis_title='Y (m)', zaxis_title='Z (m)', aspectmode='data'), margin=dict(l=0, r=0, b=0, t=0), height=550)
-        st.plotly_chart(fig)
+        st.plotly_chart(fig, use_container_width=True)
 
     with tab2:
         st.subheader("🌪️ Detalhamento de Cargas (ELU)")
@@ -517,6 +516,10 @@ def main():
             
             resultados_comp = []
             tudo_aprovado = True
+            
+            aco_props = PROPRIEDADES_ACO[tipo_aco]
+            fy_kncm2 = aco_props['fy'] / 10.0
+            gamma_a1 = 1.10
 
             for grupo, esf_grp in res.get("esforcos_grupos", {}).items():
                 nome_perfil = mapa_perfis.get(grupo)
@@ -534,7 +537,6 @@ def main():
                 v["D_sd"] = esf_grp["d_max"]
                 v["fator"] = 1.0
                 
-                # APLICAÇÃO DA TOLERÂNCIA ESCOLHIDA PELO USUÁRIO (Ex: 102% passa se tolerância for 2%)
                 if v["taxa_maxima"] <= (100.0 + tolerancia_aceitacao):
                     v["aprovado"] = True
                 else:
@@ -561,9 +563,7 @@ def main():
                 with col_d1: st.download_button("📄 Baixar TXT", data=texto_memoria, file_name="Calculo.txt")
                 with col_d2:
                     if FPDF is not None:
-                        # Criando uma opção visual para não travar a nuvem de ninguém com o PDF
                         incluir_img = col_d3.checkbox("Anexar Imagens 3D no PDF (Pode causar erro/lentidão na nuvem)")
-                        
                         st.download_button("📥 Baixar PDF", data=gerar_relatorio_pdf(texto_memoria, res, incluir_img), file_name="Calculo_Detalhado.pdf", mime="application/pdf", type="primary")
 
                 st.markdown("---")
@@ -579,6 +579,39 @@ def main():
                     c4.metric("Normal (Nsd/Nrd)", f"{v['ratio_N']:.1f}%")
                     c5.metric("Flecha", f"{v['ratio_delta']:.1f}%")
                     st.progress(min(max(int(v['taxa_maxima']), 0), 100))
+                    
+                    # --- NOVO BLOCO: EXPANDER COM MEMÓRIA DE CÁLCULO ---
+                    perf = CATALOGO_COMPLETO[v['perfil']]
+                    A = perf['A']
+                    Wx = perf['Wx']
+                    d = perf['d'] / 10.0
+                    tw = perf['tw'] / 10.0
+                    Av = d * tw
+                    
+                    with st.expander("🧮 Ver Memória de Cálculo Detalhada"):
+                        st.markdown(f"""
+                        **A. ESFORÇOS ATUANTES MÁXIMOS (Sd)**
+                        * **N_Sd** = {v['N_sd']:.2f} kN
+                        * **V_Sd** = {v['V_sd']:.2f} kN
+                        * **M_Sd** = {v['M_sd']:.2f} kNm
+                        
+                        **B. PROPRIEDADES GEOMÉTRICAS DA SEÇÃO**
+                        * **Área Bruta (A)** = {A:.2f} cm²
+                        * **Módulo Resistente Elástico (Wx)** = {Wx:.2f} cm³
+                        * **Altura (d)** = {d:.2f} cm | **Espessura da Alma (tw)** = {tw:.2f} cm
+                        * **Área de Cisalhamento Efetiva (Av = d · tw)** = {Av:.2f} cm²
+                        
+                        **C. VERIFICAÇÕES DE RESISTÊNCIA E FLECHA**
+                        * **Tração/Compressão (Fórmula: A · fy / γ_a1):** 
+                          $N_{{Rd}}$ = {v['N_rd']:.2f} kN ➔ $N_{{Sd}}$ / $N_{{Rd}}$ = **{v['ratio_N']:.1f}%**
+                        * **Cisalhamento (Fórmula: 0.60 · Av · fy / γ_a1):** 
+                          $V_{{Rd}}$ = {v['V_rd']:.2f} kN ➔ $V_{{Sd}}$ / $V_{{Rd}}$ = **{v['ratio_V']:.1f}%**
+                        * **Momento Fletor (Fórmula: Wx · fy / γ_a1):** 
+                          $M_{{Rd}}$ = {v['M_rd']:.2f} kNm ➔ $M_{{Sd}}$ / $M_{{Rd}}$ = **{v['ratio_M']:.1f}%**
+                        * **Flecha:** 
+                          $\\delta_{{lim}}$ = {v['delta_lim_mm']:.1f} mm ➔ $\\delta_{{real}}$ / $\\delta_{{lim}}$ = **{v['ratio_delta']:.1f}%**
+                        """)
+                    
                     st.markdown("---")
 
     with tab5:
