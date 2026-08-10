@@ -114,11 +114,11 @@ Tolerância de Aprovação Aplicada: +{tolerancia:.1f}%
 ---------------------------------------------------------
 - Sistema Principal: {dados['sistema_principal']}
 - Tipo de Pilar: {dados['tipo_pilar']}
-- Distribuição dos Pilares: {dados.get('distribuicao_pilares', 'N/A')}
+- Pilares Rotação 90°: {'Sim' if dados.get('rotacionar_pilares') else 'Não'}
 - Vão Transversal (X): {dados['vao_x']:.2f} m
 - Comprimento Longitudinal (Y): {dados['comp_y']:.2f} m
 - Altura (Z): {dados['altura_z']:.2f} m
-- Espaçamento entre Pórticos Principais: {dados['espacamento']:.2f} m
+- Espaçamento entre Pórticos: {dados['espacamento']:.2f} m
 """
     if dados['sistema_principal'] == "Mezanino / Passarela Metálica":
         relatorio += f"- Espaçamento entre Vigotas Transversais: {dados['espacamento_vigota']:.2f} m\n"
@@ -138,7 +138,7 @@ Tolerância de Aprovação Aplicada: +{tolerancia:.1f}%
 - Momento Fletor Máximo (M_sd): {res_analise.get('m_max_knm', 0.0):.2f} kNm
 - Deslocamento Máximo (Flecha ELS): {res_analise.get('desloc_max_mm', 0.0):.2f} mm
 
-4. TABELA DE ESFORÇOS EXTREMOS (LEGENDAS DOS DIAGRAMAS)
+4. TABELA DE ESFORÇOS EXTREMOS BIAXIAIS (LEGENDAS)
 ---------------------------------------------------------
 """
     for grp, esf in res_analise.get('esforcos_grupos', {}).items():
@@ -146,11 +146,12 @@ Tolerância de Aprovação Aplicada: +{tolerancia:.1f}%
         relatorio += f"[{grp.upper()}]\n"
         relatorio += f"  Normal (N)   -> Máx (Tração): {esf['n_pos']:.2f} kN | Mín (Comp): {esf['n_neg']:.2f} kN\n"
         relatorio += f"  Cortante (V) -> Máx: {esf['v_pos']:.2f} kN | Mín: {esf['v_neg']:.2f} kN\n"
-        relatorio += f"  Momento (M)  -> Máx (+): {esf['m_pos']:.2f} kNm | Mín (-): {esf['m_neg']:.2f} kNm\n"
-        relatorio += f"  Flecha Máx   -> {esf['d_max']:.2f} mm\n\n"
+        relatorio += f"  Momento FORTE(Mx) -> Máx (+): {esf['my_pos']:.2f} kNm | Mín (-): {esf['my_neg']:.2f} kNm\n"
+        relatorio += f"  Momento FRACO(My) -> Máx (+): {esf['mz_pos']:.2f} kNm | Mín (-): {esf['mz_neg']:.2f} kNm\n"
+        relatorio += f"  Flecha Máx        -> {esf['d_max']:.2f} mm\n\n"
 
     relatorio += f"""
-5. VERIFICAÇÃO DETALHADA POR COMPONENTE (NBR 8800)
+5. VERIFICAÇÃO DETALHADA BIAXIAL POR COMPONENTE (NBR 8800)
 ---------------------------------------------------------
 Propriedades do Material: {dados['tipo_aco']} (fy = {fy_mpa} MPa = {fy_kncm2:.1f} kN/cm²)
 Coeficiente de Minoração (γ_a1) = {gamma_a1}
@@ -160,21 +161,25 @@ Coeficiente de Minoração (γ_a1) = {gamma_a1}
         perf = CATALOGO_COMPLETO[v['perfil']]
         A = perf['A']
         Wx = perf['Wx']
+        Wy = perf['Wy']
         d = perf['d'] / 10.0
         tw = perf['tw'] / 10.0
         Av = d * tw
         status_comp = "APROVADO (COM TOLERÂNCIA)" if v['aprovado'] and v['taxa_maxima'] > 100.0 else ("APROVADO" if v['aprovado'] else "REPROVADO")
 
         relatorio += f"[{v['componente'].upper()}]\n  Perfil Selecionado: {v['perfil']} ({v['familia']})\n"
-        relatorio += f"  A. ESFORÇOS ATUANTES MÁXIMOS EM MÓDULO ABSOLUTO (Sd)\n     N_Sd = {v['N_sd']:.2f} kN | V_Sd = {v['V_sd']:.2f} kN | M_Sd = {v['M_sd']:.2f} kNm\n\n"
+        relatorio += f"  A. ESFORÇOS ATUANTES MÁXIMOS EM MÓDULO ABSOLUTO (Sd)\n     N_Sd = {v['N_sd']:.2f} kN | V_Sd = {v['V_sd']:.2f} kN\n"
+        relatorio += f"     M_Sd,x (Eixo Forte) = {v['My_sd']:.2f} kNm | M_Sd,y (Eixo Fraco) = {v['Mz_sd']:.2f} kNm\n\n"
         relatorio += f"  B. PROPRIEDADES GEOMÉTRICAS DA SEÇÃO\n"
-        relatorio += f"     Área Bruta (A) = {A:.2f} cm²\n"
-        relatorio += f"     Módulo Resistente Elástico (Wx) = {Wx:.2f} cm³\n"
+        relatorio += f"     Área Bruta (A) = {A:.2f} cm² | Área de Cisalhamento Efetiva (Av) = {Av:.2f} cm²\n"
+        relatorio += f"     Mód. Resistente: Wx (Forte) = {Wx:.2f} cm³ | Wy (Fraco) = {Wy:.2f} cm³\n"
         relatorio += f"     Altura (d) = {d:.2f} cm | Espessura da Alma (tw) = {tw:.2f} cm\n\n"
         relatorio += f"  C. VERIFICAÇÕES DE RESISTÊNCIA E FLECHA\n"
-        relatorio += f"     Tração/Compressão (N_Rd = {v['N_rd']:.2f} kN): {v['N_sd']:.2f} / {v['N_rd']:.2f} = {v['ratio_N']:.1f}%\n"
-        relatorio += f"     Cisalhamento (V_Rd = {v['V_rd']:.2f} kN): {v['V_sd']:.2f} / {v['V_rd']:.2f} = {v['ratio_V']:.1f}%\n"
-        relatorio += f"     Momento Fletor (M_Rd = {v['M_rd']:.2f} kNm): {v['M_sd']:.2f} / {v['M_rd']:.2f} = {v['ratio_M']:.1f}%\n"
+        relatorio += f"     Tração/Compressão (N_Rd = {v['N_rd']:.2f} kN): N_Sd/N_Rd = {v['ratio_N']:.1f}%\n"
+        relatorio += f"     Cisalhamento (V_Rd = {v['V_rd']:.2f} kN): V_Sd/V_Rd = {v['ratio_V']:.1f}%\n"
+        relatorio += f"     Flexão Forte (M_Rd,x = {v['M_rd_x']:.2f} kNm): M_Sd,x/M_Rd,x = {v['ratio_Mx']:.1f}%\n"
+        relatorio += f"     Flexão Fraca (M_Rd,y = {v['M_rd_y']:.2f} kNm): M_Sd,y/M_Rd,y = {v['ratio_My']:.1f}%\n"
+        relatorio += f"     Interação Flexo-Compressão (Equação 4.14 NBR 8800): Taxa Integrada = {v['taxa_interacao']:.1f}%\n"
         relatorio += f"     Flecha (δ_lim = {v['delta_lim_mm']:.1f} mm): {v['D_sd']:.2f} / {v['delta_lim_mm']:.1f} = {v['ratio_delta']:.1f}%\n\n"
         relatorio += f"  >> STATUS DA PEÇA: {status_comp} (Taxa Máxima: {v['taxa_maxima']:.1f}%)\n.........................................................\n\n"
     return relatorio
@@ -279,8 +284,14 @@ def main():
         mapa_perfis = {"Pilares Metálicos": perf_pil, "Terças de Cobertura": perf_terca, "Banzo Superior": perf_bz_sup, "Banzo Inferior": perf_bz_inf, "Diagonais": perf_diag, "Montantes": perf_mont}
 
     st.sidebar.markdown("---")
-    st.sidebar.subheader("⚖️ Segurança e Aceitação")
+    st.sidebar.subheader("⚖️ Condições e Aceitação")
     apoios_base = st.sidebar.selectbox("Vínculos na Base / Apoios", ["Engastado (Trava Translações e Rotações)", "Articulado (Trava apenas Translações)"])
+    
+    # NOVA OPÇÃO DO GIRO DOS PILARES (ÂNGULO BETA)
+    rotacionar_pilares = False
+    if tipo_pilar == "Pilar Metálico":
+        rotacionar_pilares = st.sidebar.checkbox("Rotacionar Pilares em 90° (Eixo Forte na direção Y)", value=False)
+        
     tolerancia_aceitacao = st.sidebar.number_input("Tolerância de Aceitação Máxima [%]", min_value=0.0, max_value=20.0, value=2.0, step=0.5)
 
     st.sidebar.markdown("---")
@@ -316,7 +327,6 @@ def main():
 
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📐 Geometria", "🌪️ Cargas", "⚙️ Análise", "✅ Verificação", "📊 Diagramas", "📦 BIM"])
 
-    # GERADOR DE MALHA 
     y_coords = np.arange(0, comp_y + espacamento, espacamento)
     if y_coords[-1] != comp_y: y_coords[-1] = comp_y
     all_x, all_y, all_z, edges_raw = [], [], [], []
@@ -462,14 +472,17 @@ def main():
         barras_visualizacao.append({"n1": edge["n1"], "n2": edge["n2"], "grupo": grp})
         
         if grp == "Pilares Concreto":
-            barras_prontas.append({"n1": edge["n1"], "n2": edge["n2"], "grupo": grp, "A": 0.16, "Iy": 0.002, "Iz": 0.002, "J": 0.002})
+            barras_prontas.append({"n1": edge["n1"], "n2": edge["n2"], "grupo": grp, "A": 0.16, "Iy": 0.002, "Iz": 0.002, "J": 0.002, "ang": 0.0})
             continue
 
         nome_perf = mapa_perfis.get(grp)
         if nome_perf is None: continue 
         
         props = obter_propriedades(nome_perf)
-        barras_prontas.append({"n1": edge["n1"], "n2": edge["n2"], "grupo": grp, "A": props["A"], "Iy": props["Iy"], "Iz": props["Iz"], "J": props["J"]})
+        
+        # APLICAÇÃO DO ÂNGULO BETA PARA OS PILARES
+        ang = 90.0 if (grp == "Pilares Metálicos" and rotacionar_pilares) else 0.0
+        barras_prontas.append({"n1": edge["n1"], "n2": edge["n2"], "grupo": grp, "A": props["A"], "Iy": props["Iy"], "Iz": props["Iz"], "J": props["J"], "ang": ang})
 
     with tab1:
         fig = go.Figure()
@@ -505,7 +518,7 @@ def main():
                 st.error(f"❌ Erro na análise: {st.session_state.res_analise.get('erro')}")
 
     with tab4:
-        st.subheader("✅ Verificação Exata (NBR 8800)")
+        st.subheader("✅ Verificação Biaxial Integrada (NBR 8800)")
         if not st.session_state.res_analise: 
             st.warning("Execute a Análise na Aba 3.")
         elif not st.session_state.res_analise.get("sucesso"):
@@ -517,25 +530,21 @@ def main():
             resultados_comp = []
             tudo_aprovado = True
             
-            aco_props = PROPRIEDADES_ACO[tipo_aco]
-            fy_kncm2 = aco_props['fy'] / 10.0
-            gamma_a1 = 1.10
-
             for grupo, esf_grp in res.get("esforcos_grupos", {}).items():
                 nome_perfil = mapa_perfis.get(grupo)
                 if nome_perfil is None: continue 
                 
                 v = verificador.verificar_elemento(
                     nome_perfil, 
-                    esf_grp["n_max"], esf_grp["v_max"], esf_grp["m_max"], esf_grp["d_max"], 
+                    esf_grp["n_max"], esf_grp["v_max"], esf_grp["my_max"], esf_grp["mz_max"], esf_grp["d_max"], 
                     vao_x, 1.0 
                 )
                 v["componente"] = grupo
                 v["N_sd"] = esf_grp["n_max"]
                 v["V_sd"] = esf_grp["v_max"]
-                v["M_sd"] = esf_grp["m_max"]
+                v["My_sd"] = esf_grp["my_max"]
+                v["Mz_sd"] = esf_grp["mz_max"]
                 v["D_sd"] = esf_grp["d_max"]
-                v["fator"] = 1.0
                 
                 if v["taxa_maxima"] <= (100.0 + tolerancia_aceitacao):
                     v["aprovado"] = True
@@ -555,7 +564,8 @@ def main():
                     "distribuicao_pilares": distribuicao_pilares, "vao_x": vao_x, "comp_y": comp_y, 
                     "altura_z": altura_z, "espacamento": espacamento, "espacamento_vigota": espacamento_vigota,
                     "g_total": g_total, "q_sobre": q_sobre, "q_elu": q_elu, "tipo_aco": tipo_aco, 
-                    "q_vento_liquido": q_vento_liquido, "tipo_piso": tipo_piso if sistema_principal == "Mezanino / Passarela Metálica" else "N/A"
+                    "q_vento_liquido": q_vento_liquido, "tipo_piso": tipo_piso if sistema_principal == "Mezanino / Passarela Metálica" else "N/A",
+                    "rotacionar_pilares": rotacionar_pilares
                 }
                 texto_memoria = gerar_relatorio_txt(dados_r, res, resultados_comp, tudo_aprovado, tolerancia_aceitacao)
                 
@@ -574,15 +584,16 @@ def main():
                     status_text = "✅ Ok" if v['taxa_maxima'] <= 100 else ("⚠️ Ok (Tolerado)" if v['aprovado'] else "❌ Reprovado")
                     
                     c1.metric("Status", status_text)
-                    c2.metric("Taxa", f"{v['taxa_maxima']:.1f}%")
-                    c3.metric("Momento (Msd/Mrd)", f"{v['ratio_M']:.1f}%")
-                    c4.metric("Normal (Nsd/Nrd)", f"{v['ratio_N']:.1f}%")
-                    c5.metric("Flecha", f"{v['ratio_delta']:.1f}%")
+                    c2.metric("Taxa Integ.", f"{v['taxa_maxima']:.1f}%")
+                    c3.metric("Momento Forte (Mx)", f"{v['ratio_Mx']:.1f}%")
+                    c4.metric("Momento Fraco (My)", f"{v['ratio_My']:.1f}%")
+                    c5.metric("Normal (N)", f"{v['ratio_N']:.1f}%")
                     st.progress(min(max(int(v['taxa_maxima']), 0), 100))
                     
                     perf = CATALOGO_COMPLETO[v['perfil']]
                     A = perf['A']
                     Wx = perf['Wx']
+                    Wy = perf['Wy']
                     d = perf['d'] / 10.0
                     tw = perf['tw'] / 10.0
                     Av = d * tw
@@ -592,21 +603,24 @@ def main():
                         **A. ESFORÇOS ATUANTES MÁXIMOS (Sd)**
                         * **N_Sd** = {v['N_sd']:.2f} kN
                         * **V_Sd** = {v['V_sd']:.2f} kN
-                        * **M_Sd** = {v['M_sd']:.2f} kNm
+                        * **M_Sd,x (Forte)** = {v['My_sd']:.2f} kNm | **M_Sd,y (Fraco)** = {v['Mz_sd']:.2f} kNm
                         
                         **B. PROPRIEDADES GEOMÉTRICAS DA SEÇÃO**
-                        * **Área Bruta (A)** = {A:.2f} cm²
-                        * **Módulo Resistente Elástico (Wx)** = {Wx:.2f} cm³
+                        * **Área Bruta (A)** = {A:.2f} cm² | **Área de Cisalhamento Efetiva (Av)** = {Av:.2f} cm²
+                        * **Módulos Resistentes Elásticos:** Wx (Forte) = {Wx:.2f} cm³ | Wy (Fraco) = {Wy:.2f} cm³
                         * **Altura (d)** = {d:.2f} cm | **Espessura da Alma (tw)** = {tw:.2f} cm
-                        * **Área de Cisalhamento Efetiva (Av = d · tw)** = {Av:.2f} cm²
                         
                         **C. VERIFICAÇÕES DE RESISTÊNCIA E FLECHA**
                         * **Tração/Compressão (Fórmula: A · fy / γ_a1):** 
                           $N_{{Rd}}$ = {v['N_rd']:.2f} kN ➔ $N_{{Sd}}$ / $N_{{Rd}}$ = **{v['ratio_N']:.1f}%**
                         * **Cisalhamento (Fórmula: 0.60 · Av · fy / γ_a1):** 
                           $V_{{Rd}}$ = {v['V_rd']:.2f} kN ➔ $V_{{Sd}}$ / $V_{{Rd}}$ = **{v['ratio_V']:.1f}%**
-                        * **Momento Fletor (Fórmula: Wx · fy / γ_a1):** 
-                          $M_{{Rd}}$ = {v['M_rd']:.2f} kNm ➔ $M_{{Sd}}$ / $M_{{Rd}}$ = **{v['ratio_M']:.1f}%**
+                        * **Flexão Eixo Forte (Fórmula: Wx · fy / γ_a1):** 
+                          $M_{{Rd,x}}$ = {v['M_rd_x']:.2f} kNm ➔ $M_{{Sd,x}}$ / $M_{{Rd,x}}$ = **{v['ratio_Mx']:.1f}%**
+                        * **Flexão Eixo Fraco (Fórmula: Wy · fy / γ_a1):** 
+                          $M_{{Rd,y}}$ = {v['M_rd_y']:.2f} kNm ➔ $M_{{Sd,y}}$ / $M_{{Rd,y}}$ = **{v['ratio_My']:.1f}%**
+                        * **Interação Flexo-Compressão Biaxial (NBR 8800 Eq. 4.14):** 
+                          Taxa Integrada = **{v['taxa_interacao']:.1f}%**
                         * **Flecha:** 
                           $\\delta_{{real}}$ = {v['D_sd']:.2f} mm | $\\delta_{{lim}}$ = {v['delta_lim_mm']:.1f} mm ➔ $\\delta_{{real}}$ / $\\delta_{{lim}}$ = **{v['ratio_delta']:.1f}%**
                         """)
