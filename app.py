@@ -580,7 +580,6 @@ def main():
                     c5.metric("Flecha", f"{v['ratio_delta']:.1f}%")
                     st.progress(min(max(int(v['taxa_maxima']), 0), 100))
                     
-                    # --- NOVO BLOCO: EXPANDER COM MEMÓRIA DE CÁLCULO ---
                     perf = CATALOGO_COMPLETO[v['perfil']]
                     A = perf['A']
                     Wx = perf['Wx']
@@ -609,7 +608,7 @@ def main():
                         * **Momento Fletor (Fórmula: Wx · fy / γ_a1):** 
                           $M_{{Rd}}$ = {v['M_rd']:.2f} kNm ➔ $M_{{Sd}}$ / $M_{{Rd}}$ = **{v['ratio_M']:.1f}%**
                         * **Flecha:** 
-                          $\\delta_{{lim}}$ = {v['delta_lim_mm']:.1f} mm ➔ $\\delta_{{real}}$ / $\\delta_{{lim}}$ = **{v['ratio_delta']:.1f}%**
+                          $\\delta_{{real}}$ = {v['D_sd']:.2f} mm | $\\delta_{{lim}}$ = {v['delta_lim_mm']:.1f} mm ➔ $\\delta_{{real}}$ / $\\delta_{{lim}}$ = **{v['ratio_delta']:.1f}%**
                         """)
                     
                     st.markdown("---")
