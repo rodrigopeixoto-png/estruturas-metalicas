@@ -142,13 +142,13 @@ Tolerância de Aprovação Aplicada: +{tolerancia:.1f}%
 ---------------------------------------------------------
 """
     for grp, esf in res_analise.get('esforcos_grupos', {}).items():
-        if esf["n_pos"] == -1e9: continue
+        if esf.get("n_pos", -1e9) == -1e9: continue
         relatorio += f"[{grp.upper()}]\n"
-        relatorio += f"  Normal (N)   -> Máx (Tração): {esf['n_pos']:.2f} kN | Mín (Comp): {esf['n_neg']:.2f} kN\n"
-        relatorio += f"  Cortante (V) -> Máx: {esf['v_pos']:.2f} kN | Mín: {esf['v_neg']:.2f} kN\n"
-        relatorio += f"  Momento FORTE(Mx) -> Máx (+): {esf['my_pos']:.2f} kNm | Mín (-): {esf['my_neg']:.2f} kNm\n"
-        relatorio += f"  Momento FRACO(My) -> Máx (+): {esf['mz_pos']:.2f} kNm | Mín (-): {esf['mz_neg']:.2f} kNm\n"
-        relatorio += f"  Flecha Máx        -> {esf['d_max']:.2f} mm\n\n"
+        relatorio += f"  Normal (N)   -> Máx (Tração): {esf.get('n_pos', 0.0):.2f} kN | Mín (Comp): {esf.get('n_neg', 0.0):.2f} kN\n"
+        relatorio += f"  Cortante (V) -> Máx: {esf.get('v_pos', 0.0):.2f} kN | Mín: {esf.get('v_neg', 0.0):.2f} kN\n"
+        relatorio += f"  Momento FORTE(Mx) -> Máx (+): {esf.get('my_pos', 0.0):.2f} kNm | Mín (-): {esf.get('my_neg', 0.0):.2f} kNm\n"
+        relatorio += f"  Momento FRACO(My) -> Máx (+): {esf.get('mz_pos', 0.0):.2f} kNm | Mín (-): {esf.get('mz_neg', 0.0):.2f} kNm\n"
+        relatorio += f"  Flecha Máx        -> {esf.get('d_max', 0.0):.2f} mm\n\n"
 
     relatorio += f"""
 5. VERIFICAÇÃO DETALHADA BIAXIAL POR COMPONENTE (NBR 8800)
@@ -161,7 +161,7 @@ Coeficiente de Minoração (γ_a1) = {gamma_a1}
         perf = CATALOGO_COMPLETO[v['perfil']]
         A = perf['A']
         Wx = perf['Wx']
-        Wy = perf['Wy']
+        Wy = perf.get('Wy', 0.1)
         d = perf['d'] / 10.0
         tw = perf['tw'] / 10.0
         Av = d * tw
@@ -179,7 +179,7 @@ Coeficiente de Minoração (γ_a1) = {gamma_a1}
         relatorio += f"     Cisalhamento (V_Rd = {v['V_rd']:.2f} kN): V_Sd/V_Rd = {v['ratio_V']:.1f}%\n"
         relatorio += f"     Flexão Forte (M_Rd,x = {v['M_rd_x']:.2f} kNm): M_Sd,x/M_Rd,x = {v['ratio_Mx']:.1f}%\n"
         relatorio += f"     Flexão Fraca (M_Rd,y = {v['M_rd_y']:.2f} kNm): M_Sd,y/M_Rd,y = {v['ratio_My']:.1f}%\n"
-        relatorio += f"     Interação Flexo-Compressão (Equação 4.14 NBR 8800): Taxa Integrada = {v['taxa_interacao']:.1f}%\n"
+        relatorio += f"     Interação Flexo-Compressão (Equação 4.14 NBR 8800): Taxa Integrada = {v.get('taxa_interacao', 0.0):.1f}%\n"
         relatorio += f"     Flecha (δ_lim = {v['delta_lim_mm']:.1f} mm): {v['D_sd']:.2f} / {v['delta_lim_mm']:.1f} = {v['ratio_delta']:.1f}%\n\n"
         relatorio += f"  >> STATUS DA PEÇA: {status_comp} (Taxa Máxima: {v['taxa_maxima']:.1f}%)\n.........................................................\n\n"
     return relatorio
@@ -287,7 +287,6 @@ def main():
     st.sidebar.subheader("⚖️ Condições e Aceitação")
     apoios_base = st.sidebar.selectbox("Vínculos na Base / Apoios", ["Engastado (Trava Translações e Rotações)", "Articulado (Trava apenas Translações)"])
     
-    # NOVA OPÇÃO DO GIRO DOS PILARES (ÂNGULO BETA)
     rotacionar_pilares = False
     if tipo_pilar == "Pilar Metálico":
         rotacionar_pilares = st.sidebar.checkbox("Rotacionar Pilares em 90° (Eixo Forte na direção Y)", value=False)
@@ -327,6 +326,7 @@ def main():
 
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📐 Geometria", "🌪️ Cargas", "⚙️ Análise", "✅ Verificação", "📊 Diagramas", "📦 BIM"])
 
+    # GERADOR DE MALHA 
     y_coords = np.arange(0, comp_y + espacamento, espacamento)
     if y_coords[-1] != comp_y: y_coords[-1] = comp_y
     all_x, all_y, all_z, edges_raw = [], [], [], []
@@ -480,7 +480,6 @@ def main():
         
         props = obter_propriedades(nome_perf)
         
-        # APLICAÇÃO DO ÂNGULO BETA PARA OS PILARES
         ang = 90.0 if (grp == "Pilares Metálicos" and rotacionar_pilares) else 0.0
         barras_prontas.append({"n1": edge["n1"], "n2": edge["n2"], "grupo": grp, "A": props["A"], "Iy": props["Iy"], "Iz": props["Iz"], "J": props["J"], "ang": ang})
 
@@ -530,21 +529,30 @@ def main():
             resultados_comp = []
             tudo_aprovado = True
             
+            aco_props = PROPRIEDADES_ACO[tipo_aco]
+            fy_kncm2 = aco_props['fy'] / 10.0
+            gamma_a1 = 1.10
+
             for grupo, esf_grp in res.get("esforcos_grupos", {}).items():
                 nome_perfil = mapa_perfis.get(grupo)
                 if nome_perfil is None: continue 
                 
                 v = verificador.verificar_elemento(
                     nome_perfil, 
-                    esf_grp["n_max"], esf_grp["v_max"], esf_grp["my_max"], esf_grp["mz_max"], esf_grp["d_max"], 
+                    esf_grp.get("n_max", 0.0), 
+                    esf_grp.get("v_max", 0.0), 
+                    esf_grp.get("my_max", esf_grp.get("m_max", 0.0)), 
+                    esf_grp.get("mz_max", 0.0), 
+                    esf_grp.get("d_max", 0.0), 
                     vao_x, 1.0 
                 )
                 v["componente"] = grupo
-                v["N_sd"] = esf_grp["n_max"]
-                v["V_sd"] = esf_grp["v_max"]
-                v["My_sd"] = esf_grp["my_max"]
-                v["Mz_sd"] = esf_grp["mz_max"]
-                v["D_sd"] = esf_grp["d_max"]
+                v["N_sd"] = esf_grp.get("n_max", 0.0)
+                v["V_sd"] = esf_grp.get("v_max", 0.0)
+                v["My_sd"] = esf_grp.get("my_max", esf_grp.get("m_max", 0.0))
+                v["Mz_sd"] = esf_grp.get("mz_max", 0.0)
+                v["D_sd"] = esf_grp.get("d_max", 0.0)
+                v["fator"] = 1.0
                 
                 if v["taxa_maxima"] <= (100.0 + tolerancia_aceitacao):
                     v["aprovado"] = True
@@ -593,7 +601,7 @@ def main():
                     perf = CATALOGO_COMPLETO[v['perfil']]
                     A = perf['A']
                     Wx = perf['Wx']
-                    Wy = perf['Wy']
+                    Wy = perf.get('Wy', 0.1)
                     d = perf['d'] / 10.0
                     tw = perf['tw'] / 10.0
                     Av = d * tw
@@ -616,11 +624,11 @@ def main():
                         * **Cisalhamento (Fórmula: 0.60 · Av · fy / γ_a1):** 
                           $V_{{Rd}}$ = {v['V_rd']:.2f} kN ➔ $V_{{Sd}}$ / $V_{{Rd}}$ = **{v['ratio_V']:.1f}%**
                         * **Flexão Eixo Forte (Fórmula: Wx · fy / γ_a1):** 
-                          $M_{{Rd,x}}$ = {v['M_rd_x']:.2f} kNm ➔ $M_{{Sd,x}}$ / $M_{{Rd,x}}$ = **{v['ratio_Mx']:.1f}%**
+                          $M_{{Rd,x}}$ = {v.get('M_rd_x', 0):.2f} kNm ➔ $M_{{Sd,x}}$ / $M_{{Rd,x}}$ = **{v['ratio_Mx']:.1f}%**
                         * **Flexão Eixo Fraco (Fórmula: Wy · fy / γ_a1):** 
-                          $M_{{Rd,y}}$ = {v['M_rd_y']:.2f} kNm ➔ $M_{{Sd,y}}$ / $M_{{Rd,y}}$ = **{v['ratio_My']:.1f}%**
+                          $M_{{Rd,y}}$ = {v.get('M_rd_y', 0):.2f} kNm ➔ $M_{{Sd,y}}$ / $M_{{Rd,y}}$ = **{v['ratio_My']:.1f}%**
                         * **Interação Flexo-Compressão Biaxial (NBR 8800 Eq. 4.14):** 
-                          Taxa Integrada = **{v['taxa_interacao']:.1f}%**
+                          Taxa Integrada = **{v.get('taxa_interacao', 0):.1f}%**
                         * **Flecha:** 
                           $\\delta_{{real}}$ = {v['D_sd']:.2f} mm | $\\delta_{{lim}}$ = {v['delta_lim_mm']:.1f} mm ➔ $\\delta_{{real}}$ / $\\delta_{{lim}}$ = **{v['ratio_delta']:.1f}%**
                         """)
