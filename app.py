@@ -11,9 +11,136 @@ except ImportError:
     FPDF = None
 
 from modules.solver import MotorCalculo3D
-from modules.checker import VerificadorNBR8800, CATALOGO_CHAPA_DOBRADA, CATALOGO_COMPLETO, PROPRIEDADES_ACO
 
 st.set_page_config(page_title="Dimensionador Metálico 3D", page_icon="🏗️", layout="wide")
+
+# =========================================================================================
+# BANCO DE DADOS DE PERFIS ATUALIZADO
+# =========================================================================================
+
+CATALOGO_LAMINADOS = {
+    "W 150 x 13.0": {"familia": "Laminado W", "d": 148, "bf": 100, "tw": 4.3, "tf": 4.9, "A": 16.6, "Ix": 634, "Iy": 82, "Wx": 85.7, "Wy": 16.4},
+    "W 150 x 18.0": {"familia": "Laminado W", "d": 153, "bf": 102, "tw": 5.8, "tf": 7.1, "A": 23.0, "Ix": 923, "Iy": 126, "Wx": 120.7, "Wy": 24.7},
+    "W 200 x 15.0": {"familia": "Laminado W", "d": 200, "bf": 100, "tw": 4.3, "tf": 5.2, "A": 19.1, "Ix": 1305, "Iy": 87, "Wx": 130.5, "Wy": 17.4},
+    "W 200 x 22.5": {"familia": "Laminado W", "d": 206, "bf": 102, "tw": 6.2, "tf": 8.0, "A": 28.6, "Ix": 2029, "Iy": 142, "Wx": 197.0, "Wy": 27.9},
+    "W 250 x 25.3": {"familia": "Laminado W", "d": 257, "bf": 102, "tw": 6.1, "tf": 8.4, "A": 32.2, "Ix": 3415, "Iy": 149, "Wx": 265.8, "Wy": 29.3},
+    "W 310 x 32.7": {"familia": "Laminado W", "d": 308, "bf": 102, "tw": 6.6, "tf": 10.8, "A": 41.7, "Ix": 6524, "Iy": 192, "Wx": 423.6, "Wy": 37.7},
+    "W 360 x 22.0": {"familia": "Laminado W", "d": 356, "bf": 152, "tw": 5.1, "tf": 6.4, "A": 28.5, "Ix": 5800, "Iy": 320, "Wx": 325.0, "Wy": 42.0},
+    "W 360 x 44.0": {"familia": "Laminado W", "d": 352, "bf": 171, "tw": 6.9, "tf": 9.8, "A": 56.1, "Ix": 12185, "Iy": 816, "Wx": 692.3, "Wy": 95.5},
+    "W 360 x 122 (Original)": {"familia": "Laminado W Pesado", "d": 363, "bf": 257, "tw": 13.0, "tf": 22.0, "A": 154.6, "Ix": 36435, "Iy": 6231, "Wx": 2007.4, "Wy": 484.9},
+    "W 360 x 122 (Remontado)": {"familia": "Viga Castelada", "d": 544, "bf": 257, "tw": 13.0, "tf": 22.0, "A": 178.1, "Ix": 90616, "Iy": 6234, "Wx": 3331.0, "Wy": 485.0},
+    "Perfil I 10 x 4 5/8\"": {"familia": "Laminado I Padrão", "d": 254, "bf": 117.5, "tw": 7.9, "tf": 12.5, "A": 48.2, "Ix": 5120, "Iy": 265, "Wx": 403.0, "Wy": 45.0},
+}
+
+CATALOGO_CHAPA_DOBRADA = {
+    "U 50 x 25 x 2.00": {"familia": "Chapa Dobrada U", "d": 50, "bf": 25, "tw": 2.00, "tf": 2.00, "A": 1.75, "Ix": 6.66, "Iy": 1.07, "Wx": 2.60, "Wy": 0.60},
+    "U 75 x 38 x 2.00": {"familia": "Chapa Dobrada U", "d": 75, "bf": 38, "tw": 2.00, "tf": 2.00, "A": 2.80, "Ix": 25.10, "Iy": 4.55, "Wx": 6.60, "Wy": 1.58},
+    "U 100 x 40 x 2.25": {"familia": "Chapa Dobrada U", "d": 100, "bf": 40, "tw": 2.25, "tf": 2.25, "A": 3.89, "Ix": 57.67, "Iy": 5.89, "Wx": 11.50, "Wy": 1.96},
+    "U 100 x 50 x 2.00": {"familia": "Chapa Dobrada U", "d": 100, "bf": 50, "tw": 2.00, "tf": 2.00, "A": 3.65, "Ix": 58.15, "Iy": 9.24, "Wx": 11.60, "Wy": 2.52},
+    "U 100 x 50 x 2.25": {"familia": "Chapa Dobrada U", "d": 100, "bf": 50, "tw": 2.25, "tf": 2.25, "A": 4.35, "Ix": 68.55, "Iy": 10.94, "Wx": 13.70, "Wy": 3.00},
+    "U 100 x 50 x 2.65": {"familia": "Chapa Dobrada U", "d": 100, "bf": 50, "tw": 2.65, "tf": 2.65, "A": 5.04, "Ix": 78.60, "Iy": 12.59, "Wx": 15.70, "Wy": 3.48},
+    "U 100 x 50 x 3.00": {"familia": "Chapa Dobrada U", "d": 100, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 5.71, "Ix": 88.29, "Iy": 14.20, "Wx": 17.60, "Wy": 3.94},
+    "U 127 x 50 x 3.00": {"familia": "Chapa Dobrada U", "d": 127, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 6.53, "Ix": 154.80, "Iy": 15.32, "Wx": 24.30, "Wy": 4.08},
+    "U 150 x 50 x 3.00": {"familia": "Chapa Dobrada U", "d": 150, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 7.23, "Ix": 230.10, "Iy": 16.08, "Wx": 30.60, "Wy": 4.16},
+    "U 200 x 50 x 3.00": {"familia": "Chapa Dobrada U", "d": 200, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 8.75, "Ix": 462.40, "Iy": 17.31, "Wx": 46.20, "Wy": 4.29},
+    "UE 100 x 50 x 17 x 2.25": {"familia": "U Enrijecido", "d": 100, "bf": 50, "tw": 2.25, "tf": 2.25, "A": 4.88, "Ix": 78.4, "Iy": 15.1, "Wx": 15.68, "Wy": 4.25},
+    "UE 127 x 50 x 17 x 2.65": {"familia": "U Enrijecido", "d": 127, "bf": 50, "tw": 2.65, "tf": 2.65, "A": 6.46, "Ix": 161.0, "Iy": 18.2, "Wx": 25.35, "Wy": 4.98},
+    "UE 150 x 60 x 20 x 3.00": {"familia": "U Enrijecido", "d": 150, "bf": 60, "tw": 3.00, "tf": 3.00, "A": 8.70, "Ix": 308.2, "Iy": 35.8, "Wx": 41.09, "Wy": 8.32},
+}
+
+CATALOGO_CANTONEIRAS = {
+    "L 1\" x 1/8\"": {"familia": "Cantoneira L", "d": 25.4, "bf": 25.4, "tw": 3.17, "tf": 3.17, "A": 1.51, "Ix": 0.8, "Iy": 0.8, "Wx": 0.4, "Wy": 0.4},
+    "L 1.1/4\" x 1/8\"": {"familia": "Cantoneira L", "d": 31.7, "bf": 31.7, "tw": 3.17, "tf": 3.17, "A": 1.92, "Ix": 1.8, "Iy": 1.8, "Wx": 0.8, "Wy": 0.8},
+    "L 1.1/2\" x 1/8\"": {"familia": "Cantoneira L", "d": 38.1, "bf": 38.1, "tw": 3.17, "tf": 3.17, "A": 2.32, "Ix": 3.2, "Iy": 3.2, "Wx": 1.1, "Wy": 1.1},
+    "L 1.1/2\" x 3/16\"": {"familia": "Cantoneira L", "d": 38.1, "bf": 38.1, "tw": 4.76, "tf": 4.76, "A": 3.40, "Ix": 4.6, "Iy": 4.6, "Wx": 1.7, "Wy": 1.7},
+    "L 2\" x 1/8\"": {"familia": "Cantoneira L", "d": 50.8, "bf": 50.8, "tw": 3.17, "tf": 3.17, "A": 3.12, "Ix": 7.7, "Iy": 7.7, "Wx": 2.1, "Wy": 2.1},
+    "L 2\" x 3/16\"": {"familia": "Cantoneira L", "d": 50.8, "bf": 50.8, "tw": 4.76, "tf": 4.76, "A": 4.58, "Ix": 10.9, "Iy": 10.9, "Wx": 3.0, "Wy": 3.0},
+    "L 2\" x 1/4\"": {"familia": "Cantoneira L", "d": 50.8, "bf": 50.8, "tw": 6.35, "tf": 6.35, "A": 6.06, "Ix": 14.1, "Iy": 14.1, "Wx": 4.0, "Wy": 4.0},
+    "L 2.1/2\" x 3/16\"": {"familia": "Cantoneira L", "d": 63.5, "bf": 63.5, "tw": 4.76, "tf": 4.76, "A": 5.80, "Ix": 22.4, "Iy": 22.4, "Wx": 4.8, "Wy": 4.8},
+    "L 2.1/2\" x 1/4\"": {"familia": "Cantoneira L", "d": 63.5, "bf": 63.5, "tw": 6.35, "tf": 6.35, "A": 7.67, "Ix": 28.8, "Iy": 28.8, "Wx": 6.3, "Wy": 6.3},
+    "L 3\" x 3/16\"": {"familia": "Cantoneira L", "d": 76.2, "bf": 76.2, "tw": 4.76, "tf": 4.76, "A": 7.03, "Ix": 39.5, "Iy": 39.5, "Wx": 7.1, "Wy": 7.1},
+    "L 3\" x 1/4\"": {"familia": "Cantoneira L", "d": 76.2, "bf": 76.2, "tw": 6.35, "tf": 6.35, "A": 9.29, "Ix": 51.1, "Iy": 51.1, "Wx": 9.3, "Wy": 9.3},
+    "L 3\" x 5/16\"": {"familia": "Cantoneira L", "d": 76.2, "bf": 76.2, "tw": 7.94, "tf": 7.94, "A": 11.50, "Ix": 62.4, "Iy": 62.4, "Wx": 11.5, "Wy": 11.5},
+    "L 3\" x 3/8\"": {"familia": "Cantoneira L", "d": 76.2, "bf": 76.2, "tw": 9.52, "tf": 9.52, "A": 13.60, "Ix": 72.8, "Iy": 72.8, "Wx": 13.6, "Wy": 13.6},
+    "L 4\" x 1/4\"": {"familia": "Cantoneira L", "d": 101.6, "bf": 101.6, "tw": 6.35, "tf": 6.35, "A": 12.50, "Ix": 124.0, "Iy": 124.0, "Wx": 17.0, "Wy": 17.0},
+    "L 4\" x 5/16\"": {"familia": "Cantoneira L", "d": 101.6, "bf": 101.6, "tw": 7.94, "tf": 7.94, "A": 15.50, "Ix": 153.0, "Iy": 153.0, "Wx": 21.1, "Wy": 21.1},
+    "L 4\" x 3/8\"": {"familia": "Cantoneira L", "d": 101.6, "bf": 101.6, "tw": 9.52, "tf": 9.52, "A": 18.50, "Ix": 179.0, "Iy": 179.0, "Wx": 24.9, "Wy": 24.9},
+    "L 4\" x 1/2\"": {"familia": "Cantoneira L", "d": 101.6, "bf": 101.6, "tw": 12.70, "tf": 12.70, "A": 24.20, "Ix": 230.0, "Iy": 230.0, "Wx": 32.4, "Wy": 32.4},
+    "2x L 2\" x 3/16\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 50.8, "bf": 50.8, "tw": 4.76, "tf": 4.76, "A": 9.16, "Ix": 21.8, "Iy": 44.2, "Wx": 6.0, "Wy": 10.2},
+    "2x L 2.1/2\" x 1/4\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 63.5, "bf": 63.5, "tw": 6.35, "tf": 6.35, "A": 14.8, "Ix": 54.8, "Iy": 112.0, "Wx": 12.1, "Wy": 21.5},
+}
+
+CATALOGO_COMPLETO = {**CATALOGO_LAMINADOS, **CATALOGO_CHAPA_DOBRADA, **CATALOGO_CANTONEIRAS}
+
+PROPRIEDADES_ACO = {
+    "ASTM A36": {"fy": 250, "fu": 400},
+    "ASTM A572 Gr 50": {"fy": 345, "fu": 450},
+    "USI CIVIL 300": {"fy": 300, "fu": 410}
+}
+
+class VerificadorNBR8800:
+    def __init__(self, tipo_aco="ASTM A572 Gr 50"):
+        self.aco = PROPRIEDADES_ACO.get(tipo_aco, PROPRIEDADES_ACO["ASTM A572 Gr 50"])
+        self.gamma_a1 = 1.10
+
+    def verificar_elemento(self, nome_perfil, N_sd, V_sd, My_sd, Mz_sd, delta_sd_mm, vao_m, fator_esforso=1.0):
+        perfil = CATALOGO_COMPLETO.get(nome_perfil, CATALOGO_LAMINADOS["W 200 x 22.5"])
+        fy = self.aco["fy"] / 10.0  
+        A = perfil["A"]
+        Wx = perfil["Wx"]
+        Wy = perfil.get("Wy", 0.1)
+        d = perfil["d"] / 10.0
+        tw = perfil["tw"] / 10.0
+
+        N_sd_e = abs(N_sd) * fator_esforso
+        V_sd_e = abs(V_sd) * fator_esforso
+        My_sd_e = abs(My_sd) * fator_esforso  
+        Mz_sd_e = abs(Mz_sd) * fator_esforso  
+
+        M_rd_x = (Wx * fy) / (100.0 * self.gamma_a1)
+        M_rd_y = (Wy * fy) / (100.0 * self.gamma_a1)
+        
+        Av = d * tw
+        V_rd = (0.60 * Av * fy) / self.gamma_a1
+        N_rd = (A * fy) / self.gamma_a1
+
+        ratio_N = N_sd_e / N_rd if N_rd > 0 else 0
+        ratio_Mx = My_sd_e / M_rd_x if M_rd_x > 0 else 0
+        ratio_My = Mz_sd_e / M_rd_y if M_rd_y > 0 else 0
+
+        if ratio_N >= 0.2:
+            taxa_interacao = ratio_N + (8.0/9.0) * (ratio_Mx + ratio_My)
+        else:
+            taxa_interacao = (ratio_N / 2.0) + (ratio_Mx + ratio_My)
+
+        ratio_V = V_sd_e / V_rd if V_rd > 0 else 0
+
+        delta_lim_mm = (vao_m * 1000.0) / 250.0
+        ratio_delta = delta_sd_mm / delta_lim_mm if delta_lim_mm > 0 else 0
+
+        taxa_maxima = max(taxa_interacao, ratio_V, ratio_delta)
+
+        return {
+            "perfil": nome_perfil,
+            "familia": perfil["familia"],
+            "aprovado": taxa_maxima <= 1.0,
+            "taxa_maxima": taxa_maxima * 100.0,
+            "taxa_interacao": taxa_interacao * 100.0,
+            "ratio_N": ratio_N * 100.0,
+            "ratio_Mx": ratio_Mx * 100.0,
+            "ratio_My": ratio_My * 100.0,
+            "ratio_V": ratio_V * 100.0,
+            "ratio_delta": ratio_delta * 100.0,
+            "M_rd_x": M_rd_x,
+            "M_rd_y": M_rd_y,
+            "V_rd": V_rd,
+            "N_rd": N_rd,
+            "delta_lim_mm": delta_lim_mm
+        }
+
+# =========================================================================================
+# FUNÇÕES DE INTERFACE E RELATÓRIO
+# =========================================================================================
 
 def desenhar_diagrama(res, tipo_diagrama):
     fig = go.Figure()
@@ -275,20 +402,22 @@ def main():
     tipo_aco = st.sidebar.selectbox("Aço Estrutural", list(PROPRIEDADES_ACO.keys()))
     
     lista_perfis = list(CATALOGO_COMPLETO.keys())
-    lista_chapa = list(CATALOGO_CHAPA_DOBRADA.keys())
-
+    
+    # Separando listas por família para facilitar a navegação (caso deseje)
+    # Aqui mantemos a lista global para seleção livre
+    
     if sistema_principal == "Mezanino / Passarela Metálica":
-        perf_pil = st.sidebar.selectbox("Pilares", lista_perfis, index=lista_perfis.index("W 200 x 22.5")) if tipo_pilar == "Pilar Metálico" else None
-        perf_v_prin = st.sidebar.selectbox("Vigas Principais (Longitudinais)", lista_perfis, index=lista_perfis.index("W 360 x 122 (Remontado)"))
-        perf_v_sec = st.sidebar.selectbox("Vigas Secundárias (Transversais)", lista_perfis, index=lista_perfis.index("W 150 x 18.0"))
+        perf_pil = st.sidebar.selectbox("Pilares", lista_perfis, index=lista_perfis.index("W 200 x 22.5") if "W 200 x 22.5" in lista_perfis else 0) if tipo_pilar == "Pilar Metálico" else None
+        perf_v_prin = st.sidebar.selectbox("Vigas Principais (Longitudinais)", lista_perfis, index=lista_perfis.index("W 360 x 122 (Remontado)") if "W 360 x 122 (Remontado)" in lista_perfis else 0)
+        perf_v_sec = st.sidebar.selectbox("Vigas Secundárias (Transversais)", lista_perfis, index=lista_perfis.index("W 150 x 18.0") if "W 150 x 18.0" in lista_perfis else 0)
         mapa_perfis = {"Pilares Metálicos": perf_pil, "Vigas Principais (Longitudinais)": perf_v_prin, "Vigas Secundárias (Transversais)": perf_v_sec}
     else:
-        perf_pil = st.sidebar.selectbox("Pilares", lista_perfis, index=lista_perfis.index("W 250 x 25.3")) if tipo_pilar == "Pilar Metálico" else None
-        perf_terca = st.sidebar.selectbox("Terças de Cobertura", lista_chapa, index=lista_chapa.index("U 100 x 40 x 2.25"))
-        perf_bz_sup = st.sidebar.selectbox("Banzo Superior", lista_perfis, index=lista_perfis.index("U 150 x 50 x 3.00"))
-        perf_bz_inf = st.sidebar.selectbox("Banzo Inferior", lista_perfis, index=lista_perfis.index("U 150 x 50 x 3.00"))
-        perf_diag = st.sidebar.selectbox("Diagonais", lista_perfis, index=lista_perfis.index('2x L 2" x 3/16" (Dupla)'))
-        perf_mont = st.sidebar.selectbox("Montantes", lista_perfis, index=lista_perfis.index("UE 100 x 50 x 17 x 2.25"))
+        perf_pil = st.sidebar.selectbox("Pilares", lista_perfis, index=lista_perfis.index("W 250 x 25.3") if "W 250 x 25.3" in lista_perfis else 0) if tipo_pilar == "Pilar Metálico" else None
+        perf_terca = st.sidebar.selectbox("Terças de Cobertura", lista_perfis, index=lista_perfis.index("U 100 x 40 x 2.25") if "U 100 x 40 x 2.25" in lista_perfis else 0)
+        perf_bz_sup = st.sidebar.selectbox("Banzo Superior", lista_perfis, index=lista_perfis.index("U 150 x 50 x 3.00") if "U 150 x 50 x 3.00" in lista_perfis else 0)
+        perf_bz_inf = st.sidebar.selectbox("Banzo Inferior", lista_perfis, index=lista_perfis.index("U 150 x 50 x 3.00") if "U 150 x 50 x 3.00" in lista_perfis else 0)
+        perf_diag = st.sidebar.selectbox("Diagonais", lista_perfis, index=lista_perfis.index('2x L 2" x 3/16" (Dupla)') if '2x L 2" x 3/16" (Dupla)' in lista_perfis else 0)
+        perf_mont = st.sidebar.selectbox("Montantes", lista_perfis, index=lista_perfis.index("UE 100 x 50 x 17 x 2.25") if "UE 100 x 50 x 17 x 2.25" in lista_perfis else 0)
         mapa_perfis = {"Pilares Metálicos": perf_pil, "Terças de Cobertura": perf_terca, "Banzo Superior": perf_bz_sup, "Banzo Inferior": perf_bz_inf, "Diagonais": perf_diag, "Montantes": perf_mont}
 
     st.sidebar.markdown("---")
