@@ -13,7 +13,7 @@ except ImportError:
 st.set_page_config(page_title="Dimensionador Metálico 3D", page_icon="🏗️", layout="wide")
 
 # =========================================================================================
-# BANCO DE DADOS DE PERFIS (COMPLETO COM CHAPA 10 E CANTONEIRAS DUPLAS)
+# BANCO DE DADOS DE PERFIS ATUALIZADO
 # =========================================================================================
 
 CATALOGO_LAMINADOS = {
@@ -143,10 +143,6 @@ PROPRIEDADES_ACO = {
     "ASTM A572 Gr 50": {"fy": 345, "fu": 450},
     "USI CIVIL 300": {"fy": 300, "fu": 410}
 }
-
-# =========================================================================================
-# MOTOR MATRICIAL 3D
-# =========================================================================================
 
 class MotorCalculo3D:
     def __init__(self):
@@ -384,17 +380,13 @@ class MotorCalculo3D:
                 "sucesso": True, "num_nos": len(self.nos), "num_barras": len(self.barras),
                 "n_max_kn": global_n, "v_max_kn": global_v, "m_max_knm": global_m, "desloc_max_mm": global_d,
                 "esforcos": esforcos, "reacoes": reacoes, "nos": self.nos, 
-                "barras": [(b['n1'], b['n2']) for b in self.barras],
+                "barras": self.barras,
                 "esforcos_grupos": esforcos_grupos,
                 "deslocamentos_nodais": U_completo.tolist(),
                 "vetores_locais": vetores_locais
             }
         except Exception as e:
             return {"sucesso": False, "erro": str(e)}
-
-# =========================================================================================
-# VERIFICADOR NBR 8800
-# =========================================================================================
 
 class VerificadorNBR8800:
     def __init__(self, tipo_aco="ASTM A572 Gr 50"):
@@ -500,12 +492,47 @@ class VerificadorNBR8800:
 # FUNÇÕES DE INTERFACE E RELATÓRIO
 # =========================================================================================
 
+def get_section_data(perfil_nome):
+    p = CATALOGO_COMPLETO.get(perfil_nome)
+    if not p: return [], []
+    d = p['d'] / 1000.0
+    bf = p['bf'] / 1000.0
+    fam = p['familia']
+    
+    lines = [] 
+    if "W" in fam or "I" in fam or "Castelada" in fam:
+        lines.append((0, d/2, 0, -d/2)) 
+        lines.append((-bf/2, d/2, bf/2, d/2)) 
+        lines.append((-bf/2, -d/2, bf/2, -d/2)) 
+        extremos = [(0, d/2), (0, -d/2), (-bf/2, d/2), (bf/2, d/2), (-bf/2, -d/2), (bf/2, -d/2)]
+    elif "U" in fam:
+        lines.append((-bf/2, d/2, -bf/2, -d/2)) 
+        lines.append((-bf/2, d/2, bf/2, d/2)) 
+        lines.append((-bf/2, -d/2, bf/2, -d/2)) 
+        extremos = [(-bf/2, d/2), (-bf/2, -d/2), (bf/2, d/2), (bf/2, -d/2)]
+    elif "Cantoneira" in fam:
+        if "Dupla" in fam:
+            lines.append((0, d/2, 0, -d/2)) 
+            lines.append((-bf/2, d/2, bf/2, d/2)) 
+            extremos = [(0, -d/2), (-bf/2, d/2), (bf/2, d/2)]
+        else:
+            lines.append((-bf/2, d/2, -bf/2, -d/2)) 
+            lines.append((-bf/2, -d/2, bf/2, -d/2)) 
+            extremos = [(-bf/2, d/2), (-bf/2, -d/2), (bf/2, -d/2)]
+    else:
+        lines.append((0, d/2, 0, -d/2))
+        lines.append((-bf/2, 0, bf/2, 0))
+        extremos = [(0, d/2), (0, -d/2), (-bf/2, 0), (bf/2, 0)]
+        
+    return lines, extremos
+
 def desenhar_diagrama(res, tipo_diagrama):
     fig = go.Figure()
     nos, barras, esforcos = res["nos"], res["barras"], res["esforcos"]
     
     if tipo_diagrama == "Deslocamentos (Deformada)":
-        for n1, n2 in barras:
+        for b_info in barras:
+            n1, n2 = b_info['n1'], b_info['n2']
             x1, y1, z1 = nos[n1]
             x2, y2, z2 = nos[n2]
             fig.add_trace(go.Scatter3d(x=[x1, x2], y=[y1, y2], z=[z1, z2], mode='lines', line=dict(color='lightgrey', width=1, dash='dash'), showlegend=False))
@@ -520,7 +547,8 @@ def desenhar_diagrama(res, tipo_diagrama):
                 dim_max = max(np.max(coords_arr[:, 0]), np.max(coords_arr[:, 1]), np.max(coords_arr[:, 2]))
                 scale = (dim_max * 0.1) / max_disp 
 
-            for n1, n2 in barras:
+            for b_info in barras:
+                n1, n2 = b_info['n1'], b_info['n2']
                 x1 = nos[n1][0] + U[n1*6] * scale
                 y1 = nos[n1][1] + U[n1*6+1] * scale
                 z1 = nos[n1][2] + U[n1*6+2] * scale
@@ -531,7 +559,8 @@ def desenhar_diagrama(res, tipo_diagrama):
                 fig.add_trace(go.Scatter3d(x=[x1, x2], y=[y1, y2], z=[z1, z2], mode='lines', line=dict(color='red', width=5), showlegend=False))
 
     elif tipo_diagrama == "Reações de Apoio":
-        for n1, n2 in barras:
+        for b_info in barras:
+            n1, n2 = b_info['n1'], b_info['n2']
             x1, y1, z1 = nos[n1]
             x2, y2, z2 = nos[n2]
             fig.add_trace(go.Scatter3d(x=[x1, x2], y=[y1, y2], z=[z1, z2], mode='lines', line=dict(color='lightgrey', width=2), showlegend=False))
@@ -544,8 +573,49 @@ def desenhar_diagrama(res, tipo_diagrama):
             texts.append(f"Fz: {Fz:.1f}kN<br>Fx: {Fx:.1f}kN<br>Fy: {Fy:.1f}kN")
         fig.add_trace(go.Scatter3d(x=rx, y=ry, z=rz, mode='markers+text', marker=dict(size=8, color='purple', symbol='diamond'), text=texts, textposition="top center", textfont=dict(size=11, color='purple'), showlegend=False))
     
+    elif tipo_diagrama == "Vista Extrudada (Seções 3D)":
+        for i, b_info in enumerate(barras):
+            n1, n2 = b_info['n1'], b_info['n2']
+            x1, y1, z1 = nos[n1]
+            x2, y2, z2 = nos[n2]
+            perfil_nome = b_info.get('perfil_nome')
+            if not perfil_nome: continue
+            
+            lines_loc, ext_loc = get_section_data(perfil_nome)
+            R = res.get("vetores_locais", [])[i] if "vetores_locais" in res else None
+            if not R: continue
+            R_inv = np.array(R).T
+            
+            for (ly1, lz1, ly2, lz2) in lines_loc:
+                p1_1 = np.array([x1, y1, z1]) + R_inv @ np.array([0, ly1, lz1])
+                p2_1 = np.array([x1, y1, z1]) + R_inv @ np.array([0, ly2, lz2])
+                fig.add_trace(go.Scatter3d(x=[p1_1[0], p2_1[0]], y=[p1_1[1], p2_1[1]], z=[p1_1[2], p2_1[2]], mode='lines', line=dict(color='black', width=3), showlegend=False))
+                
+                dx, dy, dz = x2-x1, y2-y1, z2-z1
+                L = np.sqrt(dx**2 + dy**2 + dz**2)
+                p1_2 = np.array([x1, y1, z1]) + R_inv @ np.array([L, ly1, lz1])
+                p2_2 = np.array([x1, y1, z1]) + R_inv @ np.array([L, ly2, lz2])
+                fig.add_trace(go.Scatter3d(x=[p1_2[0], p2_2[0]], y=[p1_2[1], p2_2[1]], z=[p1_2[2], p2_2[2]], mode='lines', line=dict(color='black', width=3), showlegend=False))
+            
+            for (ly, lz) in ext_loc:
+                p1 = np.array([x1, y1, z1]) + R_inv @ np.array([0, ly, lz])
+                p2 = np.array([x1, y1, z1]) + R_inv @ np.array([L, ly, lz])
+                fig.add_trace(go.Scatter3d(x=[p1[0], p2[0]], y=[p1[1], p2[1]], z=[p1[2], p2[2]], mode='lines', line=dict(color='gray', width=2), showlegend=False))
+                
+            cx, cy, cz = (x1+x2)/2, (y1+y2)/2, (z1+z2)/2
+            scale_axis = max(L * 0.15, 0.5) 
+            fig.add_trace(go.Scatter3d(x=[cx, cx + R[0][0]*scale_axis], y=[cy, cy + R[0][1]*scale_axis], z=[cz, cz + R[0][2]*scale_axis], mode='lines', line=dict(color='red', width=4), showlegend=False))
+            fig.add_trace(go.Scatter3d(x=[cx, cx + R[1][0]*scale_axis], y=[cy, cy + R[1][1]*scale_axis], z=[cz, cz + R[1][2]*scale_axis], mode='lines', line=dict(color='green', width=4), showlegend=False))
+            fig.add_trace(go.Scatter3d(x=[cx, cx + R[2][0]*scale_axis], y=[cy, cy + R[2][1]*scale_axis], z=[cz, cz + R[2][2]*scale_axis], mode='lines', line=dict(color='blue', width=4), showlegend=False))
+            
+        fig.add_trace(go.Scatter3d(x=[None], y=[None], z=[None], mode='lines', line=dict(color='red', width=4), name='Eixo X (Longitudinal)'))
+        fig.add_trace(go.Scatter3d(x=[None], y=[None], z=[None], mode='lines', line=dict(color='green', width=4), name='Eixo Y (Forte)'))
+        fig.add_trace(go.Scatter3d(x=[None], y=[None], z=[None], mode='lines', line=dict(color='blue', width=4), name='Eixo Z (Fraco)'))
+        fig.update_layout(showlegend=True, legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01, bgcolor="rgba(255,255,255,0.7)"))
+
     elif tipo_diagrama == "Eixos Locais dos Perfis":
-        for i, (n1, n2) in enumerate(barras):
+        for i, b_info in enumerate(barras):
+            n1, n2 = b_info['n1'], b_info['n2']
             x1, y1, z1 = nos[n1]
             x2, y2, z2 = nos[n2]
             fig.add_trace(go.Scatter3d(x=[x1, x2], y=[y1, y2], z=[z1, z2], mode='lines', line=dict(color='lightgrey', width=3), showlegend=False))
@@ -567,7 +637,8 @@ def desenhar_diagrama(res, tipo_diagrama):
         fig.update_layout(showlegend=True, legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01, bgcolor="rgba(255,255,255,0.7)"))
 
     else:
-        for n1, n2 in barras:
+        for b_info in barras:
+            n1, n2 = b_info['n1'], b_info['n2']
             x1, y1, z1 = nos[n1]
             x2, y2, z2 = nos[n2]
             fig.add_trace(go.Scatter3d(x=[x1, x2], y=[y1, y2], z=[z1, z2], mode='lines', line=dict(color='lightgrey', width=2), showlegend=False))
@@ -997,13 +1068,19 @@ def main():
         grp = edge["grupo"]
         barras_visualizacao.append({"n1": edge["n1"], "n2": edge["n2"], "grupo": grp})
         if grp == "Pilares Concreto":
-            barras_prontas.append({"n1": edge["n1"], "n2": edge["n2"], "grupo": grp, "A": 0.16, "Iy": 0.002, "Iz": 0.002, "J": 0.002, "ang": 0.0})
+            barras_prontas.append({"n1": edge["n1"], "n2": edge["n2"], "grupo": grp, "A": 0.16, "Iy": 0.002, "Iz": 0.002, "J": 0.002, "ang": 0.0, "perfil_nome": "Concreto"})
             continue
         nome_perf = mapa_perfis.get(grp)
         if nome_perf is None: continue 
         props = obter_propriedades(nome_perf)
         ang = angulos_grupos.get(grp, 0.0)
-        barras_prontas.append({"n1": edge["n1"], "n2": edge["n2"], "grupo": grp, "A": props["A"], "Iy": props["Iy"], "Iz": props["Iz"], "J": props["J"], "ang": ang})
+        
+        # PONTO CRÍTICO CORRIGIDO: Passando o perfil_nome para a visualização extrudada funcionar!
+        barras_prontas.append({
+            "n1": edge["n1"], "n2": edge["n2"], "grupo": grp, 
+            "A": props["A"], "Iy": props["Iy"], "Iz": props["Iz"], "J": props["J"], 
+            "ang": ang, "perfil_nome": nome_perf
+        })
 
     with tab1:
         fig = go.Figure()
@@ -1147,7 +1224,8 @@ def main():
 
     with tab5:
         if st.session_state.res_analise and st.session_state.res_analise.get("sucesso"):
-            tipo_diagrama = st.selectbox("Visualizar:", ["Deslocamentos (Deformada)", "Esforço Normal (Tração/Compressão)", "Esforço Cortante (Vz)", "Momento Fletor (My)", "Eixos Locais dos Perfis", "Reações de Apoio"])
+            # AQUI ESTÁ A OPÇÃO DE VISTA EXTRUDADA DE VOLTA!
+            tipo_diagrama = st.selectbox("Visualizar:", ["Deslocamentos (Deformada)", "Esforço Normal (Tração/Compressão)", "Esforço Cortante (Vz)", "Momento Fletor (My)", "Eixos Locais dos Perfis", "Vista Extrudada (Seções 3D)", "Reações de Apoio"])
             st.plotly_chart(desenhar_diagrama(st.session_state.res_analise, tipo_diagrama))
 
 if __name__ == "__main__":
