@@ -50,35 +50,24 @@ CATALOGO_CHAPA_DOBRADA = {
 }
 
 CATALOGO_CANTONEIRAS = {
-    # 1" (25.4 mm)
     "L 1\" x 1/8\"": {"familia": "Cantoneira L", "d": 25.4, "bf": 25.4, "tw": 3.17, "tf": 3.17, "A": 1.51, "Ix": 0.8, "Iy": 0.8, "Wx": 0.4, "Wy": 0.4},
     "2x L 1\" x 1/8\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 25.4, "bf": 60.8, "tw": 3.17, "tf": 3.17, "A": 3.02, "Ix": 1.6, "Iy": 3.2, "Wx": 0.8, "Wy": 1.4},
-    
-    # 1.1/4" (31.7 mm)
     "L 1.1/4\" x 1/8\"": {"familia": "Cantoneira L", "d": 31.7, "bf": 31.7, "tw": 3.17, "tf": 3.17, "A": 1.92, "Ix": 1.8, "Iy": 1.8, "Wx": 0.8, "Wy": 0.8},
     "2x L 1.1/4\" x 1/8\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 31.7, "bf": 73.4, "tw": 3.17, "tf": 3.17, "A": 3.84, "Ix": 3.6, "Iy": 7.2, "Wx": 1.6, "Wy": 2.7},
-    
-    # 1.1/2" (38.1 mm)
     "L 1.1/2\" x 1/8\"": {"familia": "Cantoneira L", "d": 38.1, "bf": 38.1, "tw": 3.17, "tf": 3.17, "A": 2.32, "Ix": 3.2, "Iy": 3.2, "Wx": 1.1, "Wy": 1.1},
     "2x L 1.1/2\" x 1/8\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 38.1, "bf": 86.2, "tw": 3.17, "tf": 3.17, "A": 4.64, "Ix": 6.4, "Iy": 12.8, "Wx": 2.2, "Wy": 3.7},
     "L 1.1/2\" x 3/16\"": {"familia": "Cantoneira L", "d": 38.1, "bf": 38.1, "tw": 4.76, "tf": 4.76, "A": 3.40, "Ix": 4.6, "Iy": 4.6, "Wx": 1.7, "Wy": 1.7},
     "2x L 1.1/2\" x 3/16\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 38.1, "bf": 86.2, "tw": 4.76, "tf": 4.76, "A": 6.80, "Ix": 9.2, "Iy": 18.4, "Wx": 3.4, "Wy": 5.8},
-    
-    # 2" (50.8 mm)
     "L 2\" x 1/8\"": {"familia": "Cantoneira L", "d": 50.8, "bf": 50.8, "tw": 3.17, "tf": 3.17, "A": 3.12, "Ix": 7.7, "Iy": 7.7, "Wx": 2.1, "Wy": 2.1},
     "2x L 2\" x 1/8\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 50.8, "bf": 111.6, "tw": 3.17, "tf": 3.17, "A": 6.24, "Ix": 15.4, "Iy": 30.8, "Wx": 4.2, "Wy": 7.1},
     "L 2\" x 3/16\"": {"familia": "Cantoneira L", "d": 50.8, "bf": 50.8, "tw": 4.76, "tf": 4.76, "A": 4.58, "Ix": 10.9, "Iy": 10.9, "Wx": 3.0, "Wy": 3.0},
     "2x L 2\" x 3/16\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 50.8, "bf": 111.6, "tw": 4.76, "tf": 4.76, "A": 9.16, "Ix": 21.8, "Iy": 44.2, "Wx": 6.0, "Wy": 10.2},
     "L 2\" x 1/4\"": {"familia": "Cantoneira L", "d": 50.8, "bf": 50.8, "tw": 6.35, "tf": 6.35, "A": 6.06, "Ix": 14.1, "Iy": 14.1, "Wx": 4.0, "Wy": 4.0},
     "2x L 2\" x 1/4\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 50.8, "bf": 111.6, "tw": 6.35, "tf": 6.35, "A": 12.12, "Ix": 28.2, "Iy": 56.4, "Wx": 8.0, "Wy": 13.6},
-    
-    # 2.1/2" (63.5 mm)
     "L 2.1/2\" x 3/16\"": {"familia": "Cantoneira L", "d": 63.5, "bf": 63.5, "tw": 4.76, "tf": 4.76, "A": 5.80, "Ix": 22.4, "Iy": 22.4, "Wx": 4.8, "Wy": 4.8},
     "2x L 2.1/2\" x 3/16\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 63.5, "bf": 137.0, "tw": 4.76, "tf": 4.76, "A": 11.60, "Ix": 44.8, "Iy": 89.6, "Wx": 9.6, "Wy": 16.3},
     "L 2.1/2\" x 1/4\"": {"familia": "Cantoneira L", "d": 63.5, "bf": 63.5, "tw": 6.35, "tf": 6.35, "A": 7.67, "Ix": 28.8, "Iy": 28.8, "Wx": 6.3, "Wy": 6.3},
     "2x L 2.1/2\" x 1/4\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 63.5, "bf": 137.0, "tw": 6.35, "tf": 6.35, "A": 14.80, "Ix": 54.8, "Iy": 112.0, "Wx": 12.1, "Wy": 21.5},
-    
-    # 3" (76.2 mm)
     "L 3\" x 3/16\"": {"familia": "Cantoneira L", "d": 76.2, "bf": 76.2, "tw": 4.76, "tf": 4.76, "A": 7.03, "Ix": 39.5, "Iy": 39.5, "Wx": 7.1, "Wy": 7.1},
     "2x L 3\" x 3/16\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 76.2, "bf": 162.4, "tw": 4.76, "tf": 4.76, "A": 14.06, "Ix": 79.0, "Iy": 158.0, "Wx": 14.2, "Wy": 24.1},
     "L 3\" x 1/4\"": {"familia": "Cantoneira L", "d": 76.2, "bf": 76.2, "tw": 6.35, "tf": 6.35, "A": 9.29, "Ix": 51.1, "Iy": 51.1, "Wx": 9.3, "Wy": 9.3},
@@ -87,8 +76,6 @@ CATALOGO_CANTONEIRAS = {
     "2x L 3\" x 5/16\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 76.2, "bf": 162.4, "tw": 7.94, "tf": 7.94, "A": 23.00, "Ix": 124.8, "Iy": 249.6, "Wx": 23.0, "Wy": 39.1},
     "L 3\" x 3/8\"": {"familia": "Cantoneira L", "d": 76.2, "bf": 76.2, "tw": 9.52, "tf": 9.52, "A": 13.60, "Ix": 72.8, "Iy": 72.8, "Wx": 13.6, "Wy": 13.6},
     "2x L 3\" x 3/8\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 76.2, "bf": 162.4, "tw": 9.52, "tf": 9.52, "A": 27.20, "Ix": 145.6, "Iy": 291.2, "Wx": 27.2, "Wy": 46.2},
-    
-    # 4" (101.6 mm)
     "L 4\" x 1/4\"": {"familia": "Cantoneira L", "d": 101.6, "bf": 101.6, "tw": 6.35, "tf": 6.35, "A": 12.50, "Ix": 124.0, "Iy": 124.0, "Wx": 17.0, "Wy": 17.0},
     "2x L 4\" x 1/4\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 101.6, "bf": 213.2, "tw": 6.35, "tf": 6.35, "A": 25.00, "Ix": 248.0, "Iy": 496.0, "Wx": 34.0, "Wy": 57.8},
     "L 4\" x 5/16\"": {"familia": "Cantoneira L", "d": 101.6, "bf": 101.6, "tw": 7.94, "tf": 7.94, "A": 15.50, "Ix": 153.0, "Iy": 153.0, "Wx": 21.1, "Wy": 21.1},
@@ -217,6 +204,7 @@ def desenhar_diagrama(res, tipo_diagrama):
         fig.add_trace(go.Scatter3d(x=rx, y=ry, z=rz, mode='markers+text', marker=dict(size=8, color='purple', symbol='diamond'), text=texts, textposition="top center", textfont=dict(size=11, color='purple'), showlegend=False))
     
     else:
+        # Base da estrutura
         for n1, n2 in barras:
             x1, y1, z1 = nos[n1]
             x2, y2, z2 = nos[n2]
@@ -228,6 +216,8 @@ def desenhar_diagrama(res, tipo_diagrama):
             max_val = max(max_val, abs(v1), abs(v2))
             
         escala = 1.2 / max_val
+        
+        # Desenha os diagramas de esforço (Ftool-style)
         for i, esf in enumerate(esforcos):
             n1, n2 = esf["n1"], esf["n2"]
             x1, y1, z1 = nos[n1]
@@ -236,16 +226,57 @@ def desenhar_diagrama(res, tipo_diagrama):
             L = np.sqrt(dx**2 + dy**2 + dz**2)
             if L == 0: continue
             
-            if "Normal" in tipo_diagrama: cor = 'royalblue' if (esf["N"][0]+esf["N"][1]) > 0 else 'crimson'
-            elif "Cortante" in tipo_diagrama: cor = 'seagreen'
-            else: cor = 'darkorange'
+            if "Normal" in tipo_diagrama: 
+                v1, v2 = esf["N"]
+                valor_medio = (v1 + v2) / 2.0
+                # Convenção: Tração > 0 (Azul), Compressão < 0 (Vermelho)
+                cor = 'royalblue' if valor_medio >= -0.01 else 'crimson'
+            elif "Cortante" in tipo_diagrama: 
+                v1, v2 = esf["Vz"]
+                cor = 'seagreen'
+            else: 
+                v1, v2 = esf["My"]
+                cor = 'darkorange'
                 
-            v1, v2 = (esf["N"] if "Normal" in tipo_diagrama else (esf["Vz"] if "Cortante" in tipo_diagrama else esf["My"]))
             nx, ny, nz = (1, 0, 0) if abs(dz)/L > 0.95 else (0, 0, 1)
             ox1, oy1, oz1 = x1 + nx*v1*escala, y1 + ny*v1*escala, z1 + nz*v1*escala
             ox2, oy2, oz2 = x2 + nx*v2*escala, y2 + ny*v2*escala, z2 + nz*v2*escala
             
-            fig.add_trace(go.Scatter3d(x=[x1, ox1, ox2, x2], y=[y1, oy1, oy2, y2], z=[z1, oz1, oz2, z2], mode='lines', line=dict(color=cor, width=3), showlegend=False))
+            # Polígono do diagrama
+            fig.add_trace(go.Scatter3d(
+                x=[x1, ox1, ox2, x2], y=[y1, oy1, oy2, y2], z=[z1, oz1, oz2, z2],
+                mode='lines', line=dict(color=cor, width=3), showlegend=False
+            ))
+            
+            # Adiciona os textos com os valores nas pontas da barra, ignorando valores ~ zero
+            t_x, t_y, t_z, t_val = [], [], [], []
+            
+            if abs(v1) > 0.1:
+                t_x.append(ox1); t_y.append(oy1); t_z.append(oz1); t_val.append(f"{v1:.1f}")
+            if abs(v2) > 0.1 and abs(v2 - v1) > 0.1: 
+                t_x.append(ox2); t_y.append(oy2); t_z.append(oz2); t_val.append(f"{v2:.1f}")
+            elif abs(v2) > 0.1 and abs(v1) <= 0.1:
+                t_x.append(ox2); t_y.append(oy2); t_z.append(oz2); t_val.append(f"{v2:.1f}")
+
+            if t_x:
+                fig.add_trace(go.Scatter3d(
+                    x=t_x, y=t_y, z=t_z,
+                    mode='text', text=t_val,
+                    textposition="top center",
+                    textfont=dict(color=cor, size=11, family="Arial Black"),
+                    showlegend=False
+                ))
+
+        # Adiciona legenda clara para o usuário identificar no topo do gráfico
+        if "Normal" in tipo_diagrama:
+            fig.add_trace(go.Scatter3d(x=[None], y=[None], z=[None], mode='lines', line=dict(color='royalblue', width=4), name='Tração (+)'))
+            fig.add_trace(go.Scatter3d(x=[None], y=[None], z=[None], mode='lines', line=dict(color='crimson', width=4), name='Compressão (-)'))
+        elif "Cortante" in tipo_diagrama:
+            fig.add_trace(go.Scatter3d(x=[None], y=[None], z=[None], mode='lines', line=dict(color='seagreen', width=4), name='Cortante'))
+        else:
+            fig.add_trace(go.Scatter3d(x=[None], y=[None], z=[None], mode='lines', line=dict(color='darkorange', width=4), name='Momento Fletor'))
+            
+        fig.update_layout(showlegend=True, legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01, bgcolor="rgba(255,255,255,0.7)"))
 
     fig.update_layout(scene=dict(xaxis_title='X (m)', yaxis_title='Y (m)', zaxis_title='Z (m)', aspectmode='data'), margin=dict(l=0, r=0, b=0, t=0), height=600)
     return fig
@@ -402,7 +433,6 @@ def main():
 
     st.sidebar.title("Configurações Gerais")
     
-    # NOVA OPÇÃO 2D ADICIONADA AQUI
     sistema_principal = st.sidebar.selectbox("Sistema Principal", ["Pórtico Alma Cheia", "Tesoura Plana (Treliçada)", "Arco", "Mezanino / Passarela Metálica", "Mão Francesa / Suporte (Plano 2D)"])
     
     if sistema_principal != "Mão Francesa / Suporte (Plano 2D)":
