@@ -11,7 +11,6 @@ except ImportError:
     FPDF = None
 
 from modules.solver import MotorCalculo3D
-from modules.checker import VerificadorNBR8800, PROPRIEDADES_ACO
 
 st.set_page_config(page_title="Dimensionador Metálico 3D", page_icon="🏗️", layout="wide")
 
@@ -50,6 +49,7 @@ CATALOGO_CHAPA_DOBRADA = {
 }
 
 CATALOGO_CANTONEIRAS = {
+    # 1" (25.4 mm)
     "L 1\" x 1/8\"": {"familia": "Cantoneira L", "d": 25.4, "bf": 25.4, "tw": 3.17, "tf": 3.17, "A": 1.51, "Ix": 0.8, "Iy": 0.8, "Wx": 0.4, "Wy": 0.4},
     "2x L 1\" x 1/8\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 25.4, "bf": 60.8, "tw": 3.17, "tf": 3.17, "A": 3.02, "Ix": 1.6, "Iy": 3.2, "Wx": 0.8, "Wy": 1.4},
     "L 1.1/4\" x 1/8\"": {"familia": "Cantoneira L", "d": 31.7, "bf": 31.7, "tw": 3.17, "tf": 3.17, "A": 1.92, "Ix": 1.8, "Iy": 1.8, "Wx": 0.8, "Wy": 0.8},
@@ -98,36 +98,84 @@ class VerificadorNBR8800:
     def __init__(self, tipo_aco="ASTM A572 Gr 50"):
         self.aco = PROPRIEDADES_ACO.get(tipo_aco, PROPRIEDADES_ACO["ASTM A572 Gr 50"])
         self.gamma_a1 = 1.10
+        self.E_cm = 20000.0  # Módulo de Elasticidade (200 GPa -> 20.000 kN/cm²)
 
-    def verificar_elemento(self, nome_perfil, N_sd, V_sd, My_sd, Mz_sd, delta_sd_mm, vao_m, fator_esforso=1.0):
+    def verificar_elemento(self, nome_perfil, N_trac_sd, N_comp_sd, V_sd, My_sd, Mz_sd, delta_sd_mm, vao_m, fator_esforso=1.0):
         perfil = CATALOGO_COMPLETO.get(nome_perfil, CATALOGO_LAMINADOS["W 200 x 22.5"])
-        fy = self.aco["fy"] / 10.0  
+        fy = self.aco["fy"] / 10.0  # MPa para kN/cm²
         A = perfil["A"]
+        Ix = perfil["Ix"]
+        Iy = perfil["Iy"]
         Wx = perfil["Wx"]
         Wy = perfil.get("Wy", 0.1)
         d = perfil["d"] / 10.0
         tw = perfil["tw"] / 10.0
 
-        N_sd_e = abs(N_sd) * fator_esforso
+        # Esforços Majorados (já deveriam vir majorados pelo fator_esforso no solver, mantendo segurança extra)
+        N_trac_sd_e = N_trac_sd * fator_esforso
+        N_comp_sd_e = N_comp_sd * fator_esforso
         V_sd_e = abs(V_sd) * fator_esforso
         My_sd_e = abs(My_sd) * fator_esforso  
         Mz_sd_e = abs(Mz_sd) * fator_esforso  
 
-        M_rd_x = (Wx * fy) / (100.0 * self.gamma_a1)
+        # -------------------------------------------------------------
+        # 1. CÁLCULO DE FLAMBAGEM GLOBAL E ESBELTEZ (NBR 8800)
+        # -------------------------------------------------------------
+        L_cm = vao_m * 100.0
+        Kx = 1.0  # Coeficiente de flambagem (articulado-articulado padrão)
+        Ky = 1.0
+        
+        # Raios de giração dinâmicos
+        rx = np.sqrt(Ix / A) if A > 0 else 1e-5
+        ry = np.sqrt(Iy / A) if A > 0 else 1e-5
+        
+        # Índice de Esbeltez global (λ)
+        esbeltez_x = (Kx * L_cm) / rx
+        esbeltez_y = (Ky * L_cm) / ry
+        esbeltez_max = max(esbeltez_x, esbeltez_y)
+        
+        # Fator de Flambagem Local (Q) - Assumido 1.0 (Perfil Compacto)
+        Q = 1.0 
+        
+        # Força Normal de Flambagem Elástica (Ne)
+        Ne = (np.pi**2 * self.E_cm * A) / (esbeltez_max**2) if esbeltez_max > 0 else 1e9
+        
+        # Parâmetro de Esbeltez Reduzida (λ0)
+        lambda_0 = np.sqrt((Q * A * fy) / Ne) if Ne > 0 else 999.0
+        
+        # Fator de Redução (χ - Qui) para Compressão
+        if lambda_0 <= 1.5:
+            chi = 0.658 ** (lambda_0**2)
+        else:
+            chi = 0.877 / (lambda_0**2)
+            
+        # -------------------------------------------------------------
+        # 2. VERIFICAÇÕES DE RESISTÊNCIA BÁSICAS
+        # -------------------------------------------------------------
+        M_rd_x = (Wx * fy) / (100.0 * self.gamma_a1)  # Dividido por 100 para kNm
         M_rd_y = (Wy * fy) / (100.0 * self.gamma_a1)
         
         Av = d * tw
         V_rd = (0.60 * Av * fy) / self.gamma_a1
-        N_rd = (A * fy) / self.gamma_a1
+        
+        # Resistências Normais Distintas
+        N_rd_trac = (A * fy) / self.gamma_a1
+        N_rd_comp = (chi * Q * A * fy) / self.gamma_a1
 
-        ratio_N = N_sd_e / N_rd if N_rd > 0 else 0
+        ratio_N_trac = N_trac_sd_e / N_rd_trac if N_rd_trac > 0 else 0
+        ratio_N_comp = N_comp_sd_e / N_rd_comp if N_rd_comp > 0 else 0
+        
+        # O ratio de tração ou compressão pior define o dimensionamento
+        ratio_N_max = max(ratio_N_trac, ratio_N_comp)
+        
         ratio_Mx = My_sd_e / M_rd_x if M_rd_x > 0 else 0
         ratio_My = Mz_sd_e / M_rd_y if M_rd_y > 0 else 0
 
-        if ratio_N >= 0.2:
-            taxa_interacao = ratio_N + (8.0/9.0) * (ratio_Mx + ratio_My)
+        # Interação Biaxial Flexo-Compressão/Tração
+        if ratio_N_max >= 0.2:
+            taxa_interacao = ratio_N_max + (8.0/9.0) * (ratio_Mx + ratio_My)
         else:
-            taxa_interacao = (ratio_N / 2.0) + (ratio_Mx + ratio_My)
+            taxa_interacao = (ratio_N_max / 2.0) + (ratio_Mx + ratio_My)
 
         ratio_V = V_sd_e / V_rd if V_rd > 0 else 0
 
@@ -142,7 +190,9 @@ class VerificadorNBR8800:
             "aprovado": taxa_maxima <= 1.0,
             "taxa_maxima": taxa_maxima * 100.0,
             "taxa_interacao": taxa_interacao * 100.0,
-            "ratio_N": ratio_N * 100.0,
+            "ratio_N": ratio_N_max * 100.0,
+            "ratio_N_trac": ratio_N_trac * 100.0,
+            "ratio_N_comp": ratio_N_comp * 100.0,
             "ratio_Mx": ratio_Mx * 100.0,
             "ratio_My": ratio_My * 100.0,
             "ratio_V": ratio_V * 100.0,
@@ -150,7 +200,14 @@ class VerificadorNBR8800:
             "M_rd_x": M_rd_x,
             "M_rd_y": M_rd_y,
             "V_rd": V_rd,
-            "N_rd": N_rd,
+            "N_rd_trac": N_rd_trac,
+            "N_rd_comp": N_rd_comp,
+            "chi": chi,
+            "esbeltez_max": esbeltez_max,
+            "Ne": Ne,
+            "lambda_0": lambda_0,
+            "rx": rx,
+            "ry": ry,
             "delta_lim_mm": delta_lim_mm
         }
 
@@ -248,7 +305,7 @@ def desenhar_diagrama(res, tipo_diagrama):
                 mode='lines', line=dict(color=cor, width=3), showlegend=False
             ))
             
-            # Adiciona os textos com os valores nas pontas da barra, ignorando valores ~ zero
+            # Adiciona os textos com os valores nas pontas da barra
             t_x, t_y, t_z, t_val = [], [], [], []
             
             if abs(v1) > 0.1:
@@ -267,7 +324,6 @@ def desenhar_diagrama(res, tipo_diagrama):
                     showlegend=False
                 ))
 
-        # Adiciona legenda clara para o usuário identificar no topo do gráfico
         if "Normal" in tipo_diagrama:
             fig.add_trace(go.Scatter3d(x=[None], y=[None], z=[None], mode='lines', line=dict(color='royalblue', width=4), name='Tração (+)'))
             fig.add_trace(go.Scatter3d(x=[None], y=[None], z=[None], mode='lines', line=dict(color='crimson', width=4), name='Compressão (-)'))
@@ -361,20 +417,26 @@ Coeficiente de Minoração (γ_a1) = {gamma_a1}
         status_comp = "APROVADO (COM TOLERÂNCIA)" if v['aprovado'] and v['taxa_maxima'] > 100.0 else ("APROVADO" if v['aprovado'] else "REPROVADO")
 
         relatorio += f"[{v['componente'].upper()}]\n  Perfil Selecionado: {v['perfil']} ({v['familia']})\n"
-        relatorio += f"  A. ESFORÇOS ATUANTES MÁXIMOS EM MÓDULO ABSOLUTO (Sd)\n     N_Sd = {v['N_sd']:.2f} kN | V_Sd = {v['V_sd']:.2f} kN\n"
-        relatorio += f"     M_Sd,x (Eixo Forte) = {v['My_sd']:.2f} kNm | M_Sd,y (Eixo Fraco) = {v['Mz_sd']:.2f} kNm\n\n"
+        relatorio += f"  A. ESFORÇOS ATUANTES MÁXIMOS EM MÓDULO ABSOLUTO (Sd)\n"
+        relatorio += f"     N_Sd (Tração) = {v.get('N_trac_sd', 0.0):.2f} kN | N_Sd (Compressão) = {v.get('N_comp_sd', 0.0):.2f} kN\n"
+        relatorio += f"     V_Sd = {v.get('V_sd', 0.0):.2f} kN\n"
+        relatorio += f"     M_Sd,x (Eixo Forte) = {v.get('My_sd', 0.0):.2f} kNm | M_Sd,y (Eixo Fraco) = {v.get('Mz_sd', 0.0):.2f} kNm\n\n"
         relatorio += f"  B. PROPRIEDADES GEOMÉTRICAS DA SEÇÃO\n"
         relatorio += f"     Área Bruta (A) = {A:.2f} cm² | Área de Cisalhamento Efetiva (Av) = {Av:.2f} cm²\n"
         relatorio += f"     Mód. Resistente: Wx (Forte) = {Wx:.2f} cm³ | Wy (Fraco) = {Wy:.2f} cm³\n"
-        relatorio += f"     Altura (d) = {d:.2f} cm | Espessura da Alma (tw) = {tw:.2f} cm\n\n"
-        relatorio += f"  C. VERIFICAÇÕES DE RESISTÊNCIA E FLECHA\n"
-        relatorio += f"     Tração/Compressão (N_Rd = {v['N_rd']:.2f} kN): N_Sd/N_Rd = {v['ratio_N']:.1f}%\n"
-        relatorio += f"     Cisalhamento (V_Rd = {v['V_rd']:.2f} kN): V_Sd/V_Rd = {v['ratio_V']:.1f}%\n"
-        relatorio += f"     Flexão Forte (M_Rd,x = {v['M_rd_x']:.2f} kNm): M_Sd,x/M_Rd,x = {v['ratio_Mx']:.1f}%\n"
-        relatorio += f"     Flexão Fraca (M_Rd,y = {v['M_rd_y']:.2f} kNm): M_Sd,y/M_Rd,y = {v['ratio_My']:.1f}%\n"
-        relatorio += f"     Interação Flexo-Compressão (Equação 4.14 NBR 8800): Taxa Integrada = {v.get('taxa_interacao', 0.0):.1f}%\n"
-        relatorio += f"     Flecha (L_vão = {v['L_teorico_m']:.2f} m | δ_lim = {v['delta_lim_mm']:.1f} mm): {v['D_sd']:.2f} / {v['delta_lim_mm']:.1f} = {v['ratio_delta']:.1f}%\n\n"
-        relatorio += f"  >> STATUS DA PEÇA: {status_comp} (Taxa Máxima: {v['taxa_maxima']:.1f}%)\n.........................................................\n\n"
+        relatorio += f"     Raios de Giração: rx = {v.get('rx', 0.0):.2f} cm | ry = {v.get('ry', 0.0):.2f} cm\n\n"
+        relatorio += f"  C. ANÁLISE DE FLAMBAGEM GLOBAL E ESBELTEZ\n"
+        relatorio += f"     Índice de Esbeltez (λ) = {v.get('esbeltez_max', 0.0):.1f} (Limite: 200)\n"
+        relatorio += f"     Fator de Redução de Compressão (χ) = {v.get('chi', 1.0):.3f}\n\n"
+        relatorio += f"  D. VERIFICAÇÕES DE RESISTÊNCIA E FLECHA\n"
+        relatorio += f"     Resistência Tracionada (N_Rd,t = {v.get('N_rd_trac', 0.0):.2f} kN) -> Taxa: {v.get('ratio_N_trac', 0.0):.1f}%\n"
+        relatorio += f"     Resistência Comprimida (N_Rd,c = {v.get('N_rd_comp', 0.0):.2f} kN) -> Taxa: {v.get('ratio_N_comp', 0.0):.1f}%\n"
+        relatorio += f"     Cisalhamento (V_Rd = {v.get('V_rd', 0.0):.2f} kN): V_Sd/V_Rd = {v.get('ratio_V', 0.0):.1f}%\n"
+        relatorio += f"     Flexão Forte (M_Rd,x = {v.get('M_rd_x', 0.0):.2f} kNm): M_Sd,x/M_Rd,x = {v.get('ratio_Mx', 0.0):.1f}%\n"
+        relatorio += f"     Flexão Fraca (M_Rd,y = {v.get('M_rd_y', 0.0):.2f} kNm): M_Sd,y/M_Rd,y = {v.get('ratio_My', 0.0):.1f}%\n"
+        relatorio += f"     Interação Flexo-Compressão Biaxial: Taxa Integrada = {v.get('taxa_interacao', 0.0):.1f}%\n"
+        relatorio += f"     Flecha (L_vão = {v.get('L_teorico_m', 0.0):.2f} m | δ_lim = {v.get('delta_lim_mm', 0.0):.1f} mm): {v.get('D_sd', 0.0):.2f} / {v.get('delta_lim_mm', 1.0):.1f} = {v.get('ratio_delta', 0.0):.1f}%\n\n"
+        relatorio += f"  >> STATUS DA PEÇA: {status_comp} (Taxa Máxima: {v.get('taxa_maxima', 0.0):.1f}%)\n.........................................................\n\n"
     return relatorio
 
 def gerar_relatorio_pdf(texto_memoria, res_analise=None, incluir_graficos=False):
@@ -762,7 +824,7 @@ def main():
                 st.error(f"❌ Erro na análise: {st.session_state.res_analise.get('erro')}")
 
     with tab4:
-        st.subheader("✅ Verificação Biaxial Integrada (NBR 8800)")
+        st.subheader("✅ Verificação Biaxial Integrada e Flambagem (NBR 8800)")
         if not st.session_state.res_analise: 
             st.warning("Execute a Análise na Aba 3.")
         elif not st.session_state.res_analise.get("sucesso"):
@@ -774,10 +836,6 @@ def main():
             resultados_comp = []
             tudo_aprovado = True
             
-            aco_props = PROPRIEDADES_ACO[tipo_aco]
-            fy_kncm2 = aco_props['fy'] / 10.0
-            gamma_a1 = 1.10
-
             for grupo, esf_grp in res.get("esforcos_grupos", {}).items():
                 nome_perfil = mapa_perfis.get(grupo)
                 if nome_perfil is None: continue 
@@ -803,18 +861,26 @@ def main():
                         L_teorico = vao_x
                     else:
                         L_teorico = esf_grp.get("L_max", vao_x)
+                        
+                # Define precisamente a Tração (+) e Compressão (-)
+                N_trac = max(0.0, esf_grp.get("n_pos", 0.0))
+                N_comp = abs(min(0.0, esf_grp.get("n_neg", 0.0)))
 
                 v = verificador.verificar_elemento(
                     nome_perfil, 
-                    esf_grp.get("n_max", 0.0), 
+                    N_trac, 
+                    N_comp, 
                     esf_grp.get("v_max", 0.0), 
                     esf_grp.get("my_max", esf_grp.get("m_max", 0.0)), 
                     esf_grp.get("mz_max", 0.0), 
                     esf_grp.get("d_max", 0.0), 
                     L_teorico, 1.0 
                 )
+                
                 v["componente"] = grupo
-                v["N_sd"] = esf_grp.get("n_max", 0.0)
+                v["N_sd"] = max(N_trac, N_comp)
+                v["N_trac_sd"] = N_trac
+                v["N_comp_sd"] = N_comp
                 v["V_sd"] = esf_grp.get("v_max", 0.0)
                 v["My_sd"] = esf_grp.get("my_max", esf_grp.get("m_max", 0.0))
                 v["Mz_sd"] = esf_grp.get("mz_max", 0.0)
@@ -822,7 +888,7 @@ def main():
                 v["L_teorico_m"] = L_teorico
                 v["fator"] = 1.0
                 
-                if v["taxa_maxima"] <= (100.0 + tolerancia_aceitacao):
+                if v["taxa_maxima"] <= (100.0 + tolerancia_aceitacao) and v["esbeltez_max"] <= 200.0:
                     v["aprovado"] = True
                 else:
                     v["aprovado"] = False
@@ -859,14 +925,16 @@ def main():
                     st.write(f"#### 🔹 {v['componente']} — `{v['perfil']}`")
                     c1, c2, c3, c4, c5 = st.columns(5)
                     
-                    status_text = "✅ Ok" if v['taxa_maxima'] <= 100 else ("⚠️ Ok (Tolerado)" if v['aprovado'] else "❌ Reprovado")
+                    status_text = "✅ Ok" if v['taxa_maxima'] <= 100 and v['esbeltez_max'] <= 200 else ("⚠️ Ok (Tolerado)" if v['aprovado'] else "❌ Reprovado")
                     
                     c1.metric("Status", status_text)
                     c2.metric("Taxa Integ.", f"{v['taxa_maxima']:.1f}%")
-                    c3.metric("Momento Forte (Mx)", f"{v['ratio_Mx']:.1f}%")
-                    c4.metric("Momento Fraco (My)", f"{v['ratio_My']:.1f}%")
-                    c5.metric("Normal (N)", f"{v['ratio_N']:.1f}%")
-                    st.progress(min(max(int(v['taxa_maxima']), 0), 100))
+                    c3.metric("Normal", f"{v['ratio_N']:.1f}%")
+                    c4.metric("Momento X", f"{v['ratio_Mx']:.1f}%")
+                    c5.metric("Esbeltez (λ)", f"{v['esbeltez_max']:.1f}")
+                    
+                    if v['taxa_maxima'] > 100:
+                        st.progress(min(max(int(v['taxa_maxima']), 0), 100))
                     
                     perf = CATALOGO_COMPLETO[v['perfil']]
                     A = perf['A']
@@ -876,21 +944,29 @@ def main():
                     tw = perf['tw'] / 10.0
                     Av = d * tw
                     
-                    with st.expander("🧮 Ver Memória de Cálculo Detalhada"):
+                    with st.expander("🧮 Ver Memória de Cálculo Detalhada e Flambagem"):
                         st.markdown(f"""
                         **A. ESFORÇOS ATUANTES MÁXIMOS (Sd)**
-                        * **N_Sd** = {v['N_sd']:.2f} kN
+                        * **N_Sd (Tração)** = {v['N_trac_sd']:.2f} kN | **N_Sd (Compressão)** = {v['N_comp_sd']:.2f} kN
                         * **V_Sd** = {v['V_sd']:.2f} kN
                         * **M_Sd,x (Forte)** = {v['My_sd']:.2f} kNm | **M_Sd,y (Fraco)** = {v['Mz_sd']:.2f} kNm
                         
                         **B. PROPRIEDADES GEOMÉTRICAS DA SEÇÃO**
                         * **Área Bruta (A)** = {A:.2f} cm² | **Área de Cisalhamento Efetiva (Av)** = {Av:.2f} cm²
                         * **Módulos Resistentes Elásticos:** Wx (Forte) = {Wx:.2f} cm³ | Wy (Fraco) = {Wy:.2f} cm³
-                        * **Altura (d)** = {d:.2f} cm | **Espessura da Alma (tw)** = {tw:.2f} cm
+                        * **Raios de Giração:** rx = {v['rx']:.2f} cm | ry = {v['ry']:.2f} cm
                         
-                        **C. VERIFICAÇÕES DE RESISTÊNCIA E FLECHA**
-                        * **Tração/Compressão (Fórmula: A · fy / γ_a1):** 
-                          $N_{{Rd}}$ = {v['N_rd']:.2f} kN ➔ $N_{{Sd}}$ / $N_{{Rd}}$ = **{v['ratio_N']:.1f}%**
+                        **C. ANÁLISE DE FLAMBAGEM GLOBAL E ESBELTEZ**
+                        * **Índice de Esbeltez Máximo (λ):** {v['esbeltez_max']:.1f} (Limite NBR 8800 = 200)
+                        * **Força de Flambagem Elástica (Ne):** {v['Ne']:.2f} kN
+                        * **Esbeltez Reduzida (λ0):** {v['lambda_0']:.3f}
+                        * **Fator de Redução de Flambagem (χ):** **{v['chi']:.3f}** (Reduz a resistência à compressão)
+                        
+                        **D. VERIFICAÇÕES DE RESISTÊNCIA E FLECHA**
+                        * **Resistência à Tração (Fórmula: A · fy / γ_a1):** 
+                          $N_{{Rd,t}}$ = {v['N_rd_trac']:.2f} kN ➔ $N_{{Sd,trac}}$ / $N_{{Rd,t}}$ = **{v['ratio_N_trac']:.1f}%**
+                        * **Resistência à Compressão (Fórmula: χ · Q · A · fy / γ_a1):** 
+                          $N_{{Rd,c}}$ = {v['N_rd_comp']:.2f} kN ➔ $N_{{Sd,comp}}$ / $N_{{Rd,c}}$ = **{v['ratio_N_comp']:.1f}%**
                         * **Cisalhamento (Fórmula: 0.60 · Av · fy / γ_a1):** 
                           $V_{{Rd}}$ = {v['V_rd']:.2f} kN ➔ $V_{{Sd}}$ / $V_{{Rd}}$ = **{v['ratio_V']:.1f}%**
                         * **Flexão Eixo Forte (Fórmula: Wx · fy / γ_a1):** 
