@@ -10,13 +10,10 @@ try:
 except ImportError:
     FPDF = None
 
-from modules.solver import MotorCalculo3D
-from modules.checker import VerificadorNBR8800, PROPRIEDADES_ACO
-
 st.set_page_config(page_title="Dimensionador Metálico 3D", page_icon="🏗️", layout="wide")
 
 # =========================================================================================
-# BANCO DE DADOS DE PERFIS ATUALIZADO
+# BANCO DE DADOS DE PERFIS (COMPLETO COM CHAPA 10 E CANTONEIRAS DUPLAS)
 # =========================================================================================
 
 CATALOGO_LAMINADOS = {
@@ -34,34 +31,47 @@ CATALOGO_LAMINADOS = {
 }
 
 CATALOGO_CHAPA_DOBRADA = {
+    # --- U Simples 50 x 25 ---
     "U 50 x 25 x 2.00": {"familia": "Chapa Dobrada U", "d": 50, "bf": 25, "tw": 2.00, "tf": 2.00, "A": 1.75, "Ix": 6.66, "Iy": 1.07, "Wx": 2.60, "Wy": 0.60},
     "U 50 x 25 x 2.25": {"familia": "Chapa Dobrada U", "d": 50, "bf": 25, "tw": 2.25, "tf": 2.25, "A": 1.95, "Ix": 7.40, "Iy": 1.19, "Wx": 2.96, "Wy": 0.66},
     "U 50 x 25 x 2.65": {"familia": "Chapa Dobrada U", "d": 50, "bf": 25, "tw": 2.65, "tf": 2.65, "A": 2.27, "Ix": 8.55, "Iy": 1.38, "Wx": 3.42, "Wy": 0.76},
     "U 50 x 25 x 3.00": {"familia": "Chapa Dobrada U", "d": 50, "bf": 25, "tw": 3.00, "tf": 3.00, "A": 2.54, "Ix": 9.50, "Iy": 1.52, "Wx": 3.80, "Wy": 0.84},
     "U 50 x 25 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 50, "bf": 25, "tw": 3.35, "tf": 3.35, "A": 2.81, "Ix": 10.40, "Iy": 1.65, "Wx": 4.16, "Wy": 0.91},
+
+    # --- U Simples 75 x 38 ---
     "U 75 x 38 x 2.00": {"familia": "Chapa Dobrada U", "d": 75, "bf": 38, "tw": 2.00, "tf": 2.00, "A": 2.80, "Ix": 25.10, "Iy": 4.55, "Wx": 6.60, "Wy": 1.58},
     "U 75 x 38 x 2.25": {"familia": "Chapa Dobrada U", "d": 75, "bf": 38, "tw": 2.25, "tf": 2.25, "A": 3.13, "Ix": 27.90, "Iy": 5.05, "Wx": 7.44, "Wy": 1.75},
     "U 75 x 38 x 2.65": {"familia": "Chapa Dobrada U", "d": 75, "bf": 38, "tw": 2.65, "tf": 2.65, "A": 3.65, "Ix": 32.40, "Iy": 5.85, "Wx": 8.64, "Wy": 2.02},
     "U 75 x 38 x 3.00": {"familia": "Chapa Dobrada U", "d": 75, "bf": 38, "tw": 3.00, "tf": 3.00, "A": 4.09, "Ix": 36.10, "Iy": 6.50, "Wx": 9.62, "Wy": 2.24},
     "U 75 x 38 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 75, "bf": 38, "tw": 3.35, "tf": 3.35, "A": 4.52, "Ix": 39.70, "Iy": 7.10, "Wx": 10.58, "Wy": 2.45},
+
+    # --- U Simples 75 x 40 ---
     "U 75 x 40 x 2.00": {"familia": "Chapa Dobrada U", "d": 75, "bf": 40, "tw": 2.00, "tf": 2.00, "A": 2.80, "Ix": 25.10, "Iy": 4.55, "Wx": 6.60, "Wy": 1.58},
     "U 75 x 40 x 2.65": {"familia": "Chapa Dobrada U", "d": 75, "bf": 40, "tw": 2.65, "tf": 2.65, "A": 3.75, "Ix": 32.20, "Iy": 5.80, "Wx": 8.50, "Wy": 2.05},
     "U 75 x 40 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 75, "bf": 40, "tw": 3.35, "tf": 3.35, "A": 4.60, "Ix": 38.50, "Iy": 6.90, "Wx": 10.20, "Wy": 2.50},
+
+    # --- U Simples 100 x 40 & 100 x 50 ---
     "U 100 x 40 x 2.25": {"familia": "Chapa Dobrada U", "d": 100, "bf": 40, "tw": 2.25, "tf": 2.25, "A": 3.89, "Ix": 57.67, "Iy": 5.89, "Wx": 11.50, "Wy": 1.96},
     "U 100 x 50 x 2.00": {"familia": "Chapa Dobrada U", "d": 100, "bf": 50, "tw": 2.00, "tf": 2.00, "A": 3.65, "Ix": 58.15, "Iy": 9.24, "Wx": 11.60, "Wy": 2.52},
     "U 100 x 50 x 2.25": {"familia": "Chapa Dobrada U", "d": 100, "bf": 50, "tw": 2.25, "tf": 2.25, "A": 4.35, "Ix": 68.55, "Iy": 10.94, "Wx": 13.70, "Wy": 3.00},
     "U 100 x 50 x 2.65": {"familia": "Chapa Dobrada U", "d": 100, "bf": 50, "tw": 2.65, "tf": 2.65, "A": 5.04, "Ix": 78.60, "Iy": 12.59, "Wx": 15.70, "Wy": 3.48},
     "U 100 x 50 x 3.00": {"familia": "Chapa Dobrada U", "d": 100, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 5.71, "Ix": 88.29, "Iy": 14.20, "Wx": 17.60, "Wy": 3.94},
     "U 100 x 50 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 100, "bf": 50, "tw": 3.35, "tf": 3.35, "A": 6.30, "Ix": 96.10, "Iy": 15.60, "Wx": 19.20, "Wy": 4.40},
+
+    # --- U Simples 127 x 50 ---
     "U 127 x 50 x 2.00": {"familia": "Chapa Dobrada U", "d": 127, "bf": 50, "tw": 2.00, "tf": 2.00, "A": 4.38, "Ix": 106.0, "Iy": 10.40, "Wx": 16.70, "Wy": 2.80},
     "U 127 x 50 x 2.25": {"familia": "Chapa Dobrada U", "d": 127, "bf": 50, "tw": 2.25, "tf": 2.25, "A": 4.90, "Ix": 118.0, "Iy": 11.60, "Wx": 18.60, "Wy": 3.10},
     "U 127 x 50 x 2.65": {"familia": "Chapa Dobrada U", "d": 127, "bf": 50, "tw": 2.65, "tf": 2.65, "A": 5.75, "Ix": 138.0, "Iy": 13.50, "Wx": 21.70, "Wy": 3.60},
     "U 127 x 50 x 3.00": {"familia": "Chapa Dobrada U", "d": 127, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 6.53, "Ix": 154.8, "Iy": 15.32, "Wx": 24.30, "Wy": 4.08},
     "U 127 x 50 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 127, "bf": 50, "tw": 3.35, "tf": 3.35, "A": 7.20, "Ix": 171.0, "Iy": 16.70, "Wx": 26.90, "Wy": 4.50},
+
+    # --- U Simples 150 x 50 ---
     "U 150 x 50 x 2.00": {"familia": "Chapa Dobrada U", "d": 150, "bf": 50, "tw": 2.00, "tf": 2.00, "A": 4.84, "Ix": 160.0, "Iy": 10.70, "Wx": 21.30, "Wy": 2.80},
     "U 150 x 50 x 2.65": {"familia": "Chapa Dobrada U", "d": 150, "bf": 50, "tw": 2.65, "tf": 2.65, "A": 6.36, "Ix": 208.0, "Iy": 13.80, "Wx": 27.70, "Wy": 3.70},
     "U 150 x 50 x 3.00": {"familia": "Chapa Dobrada U", "d": 150, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 7.23, "Ix": 230.1, "Iy": 16.08, "Wx": 30.60, "Wy": 4.16},
     "U 150 x 50 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 150, "bf": 50, "tw": 3.35, "tf": 3.35, "A": 7.97, "Ix": 257.0, "Iy": 17.10, "Wx": 34.30, "Wy": 4.60},
+
+    # --- U Simples 200 x 75 ---
     "U 200 x 75 x 2.65": {"familia": "Chapa Dobrada U", "d": 200, "bf": 75, "tw": 2.65, "tf": 2.65, "A": 9.01, "Ix": 538.0, "Iy": 49.30, "Wx": 53.80, "Wy": 9.20},
     "U 200 x 75 x 3.00": {"familia": "Chapa Dobrada U", "d": 200, "bf": 75, "tw": 3.00, "tf": 3.00, "A": 10.10, "Ix": 604.0, "Iy": 55.40, "Wx": 60.40, "Wy": 10.30},
     "U 200 x 75 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 200, "bf": 75, "tw": 3.35, "tf": 3.35, "A": 11.30, "Ix": 668.0, "Iy": 61.30, "Wx": 66.80, "Wy": 11.40},
@@ -133,6 +143,10 @@ PROPRIEDADES_ACO = {
     "ASTM A572 Gr 50": {"fy": 345, "fu": 450},
     "USI CIVIL 300": {"fy": 300, "fu": 410}
 }
+
+# =========================================================================================
+# MOTOR MATRICIAL 3D
+# =========================================================================================
 
 class MotorCalculo3D:
     def __init__(self):
@@ -377,6 +391,114 @@ class MotorCalculo3D:
             }
         except Exception as e:
             return {"sucesso": False, "erro": str(e)}
+
+# =========================================================================================
+# VERIFICADOR NBR 8800
+# =========================================================================================
+
+class VerificadorNBR8800:
+    def __init__(self, tipo_aco="ASTM A572 Gr 50"):
+        self.aco = PROPRIEDADES_ACO.get(tipo_aco, PROPRIEDADES_ACO["ASTM A572 Gr 50"])
+        self.gamma_a1 = 1.10
+        self.E_cm = 20000.0  
+
+    def verificar_elemento(self, nome_perfil, N_trac_sd, N_comp_sd, V_sd, My_sd, Mz_sd, delta_sd_mm, vao_m, fator_esforso=1.0):
+        perfil = CATALOGO_COMPLETO.get(nome_perfil, CATALOGO_LAMINADOS["W 200 x 22.5"])
+        fy = self.aco["fy"] / 10.0  
+        A = perfil["A"]
+        Ix = perfil["Ix"]
+        Iy = perfil["Iy"]
+        Wx = perfil["Wx"]
+        Wy = perfil.get("Wy", 0.1)
+        d = perfil["d"] / 10.0
+        tw = perfil["tw"] / 10.0
+
+        N_trac_sd_e = N_trac_sd * fator_esforso
+        N_comp_sd_e = N_comp_sd * fator_esforso
+        V_sd_e = abs(V_sd) * fator_esforso
+        My_sd_e = abs(My_sd) * fator_esforso  
+        Mz_sd_e = abs(Mz_sd) * fator_esforso  
+
+        L_cm = vao_m * 100.0
+        Kx = 1.0  
+        Ky = 1.0
+        
+        rx = np.sqrt(Ix / A) if A > 0 else 1e-5
+        ry = np.sqrt(Iy / A) if A > 0 else 1e-5
+        
+        esbeltez_x = (Kx * L_cm) / rx
+        esbeltez_y = (Ky * L_cm) / ry
+        esbeltez_max = max(esbeltez_x, esbeltez_y)
+        
+        Q = 1.0 
+        
+        Ne = (np.pi**2 * self.E_cm * A) / (esbeltez_max**2) if esbeltez_max > 0 else 1e9
+        
+        lambda_0 = np.sqrt((Q * A * fy) / Ne) if Ne > 0 else 999.0
+        
+        if lambda_0 <= 1.5:
+            chi = 0.658 ** (lambda_0**2)
+        else:
+            chi = 0.877 / (lambda_0**2)
+            
+        M_rd_x = (Wx * fy) / (100.0 * self.gamma_a1)  
+        M_rd_y = (Wy * fy) / (100.0 * self.gamma_a1)
+        
+        Av = d * tw
+        V_rd = (0.60 * Av * fy) / self.gamma_a1
+        
+        N_rd_trac = (A * fy) / self.gamma_a1
+        N_rd_comp = (chi * Q * A * fy) / self.gamma_a1
+
+        ratio_N_trac = N_trac_sd_e / N_rd_trac if N_rd_trac > 0 else 0
+        ratio_N_comp = N_comp_sd_e / N_rd_comp if N_rd_comp > 0 else 0
+        ratio_N_max = max(ratio_N_trac, ratio_N_comp)
+        
+        ratio_Mx = My_sd_e / M_rd_x if M_rd_x > 0 else 0
+        ratio_My = Mz_sd_e / M_rd_y if M_rd_y > 0 else 0
+
+        if ratio_N_max >= 0.2:
+            taxa_interacao = ratio_N_max + (8.0/9.0) * (ratio_Mx + ratio_My)
+        else:
+            taxa_interacao = (ratio_N_max / 2.0) + (ratio_Mx + ratio_My)
+
+        ratio_V = V_sd_e / V_rd if V_rd > 0 else 0
+
+        delta_lim_mm = (vao_m * 1000.0) / 250.0
+        ratio_delta = delta_sd_mm / delta_lim_mm if delta_lim_mm > 0 else 0
+
+        taxa_maxima = max(taxa_interacao, ratio_V, ratio_delta)
+
+        return {
+            "perfil": nome_perfil,
+            "familia": perfil["familia"],
+            "aprovado": taxa_maxima <= 1.0,
+            "taxa_maxima": taxa_maxima * 100.0,
+            "taxa_interacao": taxa_interacao * 100.0,
+            "ratio_N": ratio_N_max * 100.0,
+            "ratio_N_trac": ratio_N_trac * 100.0,
+            "ratio_N_comp": ratio_N_comp * 100.0,
+            "ratio_Mx": ratio_Mx * 100.0,
+            "ratio_My": ratio_My * 100.0,
+            "ratio_V": ratio_V * 100.0,
+            "ratio_delta": ratio_delta * 100.0,
+            "M_rd_x": M_rd_x,
+            "M_rd_y": M_rd_y,
+            "V_rd": V_rd,
+            "N_rd_trac": N_rd_trac,
+            "N_rd_comp": N_rd_comp,
+            "chi": chi,
+            "esbeltez_max": esbeltez_max,
+            "Ne": Ne,
+            "lambda_0": lambda_0,
+            "rx": rx,
+            "ry": ry,
+            "delta_lim_mm": delta_lim_mm
+        }
+
+# =========================================================================================
+# FUNÇÕES DE INTERFACE E RELATÓRIO
+# =========================================================================================
 
 def desenhar_diagrama(res, tipo_diagrama):
     fig = go.Figure()
@@ -880,7 +1002,6 @@ def main():
         nome_perf = mapa_perfis.get(grp)
         if nome_perf is None: continue 
         props = obter_propriedades(nome_perf)
-        
         ang = angulos_grupos.get(grp, 0.0)
         barras_prontas.append({"n1": edge["n1"], "n2": edge["n2"], "grupo": grp, "A": props["A"], "Iy": props["Iy"], "Iz": props["Iz"], "J": props["J"], "ang": ang})
 
