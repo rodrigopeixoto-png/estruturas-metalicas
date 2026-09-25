@@ -101,6 +101,72 @@ CATALOGO_CANTONEIRAS = {
 
 CATALOGO_COMPLETO = {**CATALOGO_LAMINADOS, **CATALOGO_CHAPA_DOBRADA, **CATALOGO_CANTONEIRAS}
 
+PROPRIEDADES_ACO = {
+    "ASTM A36": {"fy": 250, "fu": 400},
+    "ASTM A572 Gr 50": {"fy": 345, "fu": 450},
+    "USI CIVIL 300": {"fy": 300, "fu": 410}
+}
+
+class VerificadorNBR8800:
+    def __init__(self, tipo_aco="ASTM A572 Gr 50"):
+        self.aco = PROPRIEDADES_ACO.get(tipo_aco, PROPRIEDADES_ACO["ASTM A572 Gr 50"])
+        self.gamma_a1 = 1.10
+
+    def verificar_elemento(self, nome_perfil, N_sd, V_sd, My_sd, Mz_sd, delta_sd_mm, vao_m, fator_esforso=1.0):
+        perfil = CATALOGO_COMPLETO.get(nome_perfil, CATALOGO_LAMINADOS["W 200 x 22.5"])
+        fy = self.aco["fy"] / 10.0  
+        A = perfil["A"]
+        Wx = perfil["Wx"]
+        Wy = perfil.get("Wy", 0.1)
+        d = perfil["d"] / 10.0
+        tw = perfil["tw"] / 10.0
+
+        N_sd_e = abs(N_sd) * fator_esforso
+        V_sd_e = abs(V_sd) * fator_esforso
+        My_sd_e = abs(My_sd) * fator_esforso  
+        Mz_sd_e = abs(Mz_sd) * fator_esforso  
+
+        M_rd_x = (Wx * fy) / (100.0 * self.gamma_a1)
+        M_rd_y = (Wy * fy) / (100.0 * self.gamma_a1)
+        
+        Av = d * tw
+        V_rd = (0.60 * Av * fy) / self.gamma_a1
+        N_rd = (A * fy) / self.gamma_a1
+
+        ratio_N = N_sd_e / N_rd if N_rd > 0 else 0
+        ratio_Mx = My_sd_e / M_rd_x if M_rd_x > 0 else 0
+        ratio_My = Mz_sd_e / M_rd_y if M_rd_y > 0 else 0
+
+        if ratio_N >= 0.2:
+            taxa_interacao = ratio_N + (8.0/9.0) * (ratio_Mx + ratio_My)
+        else:
+            taxa_interacao = (ratio_N / 2.0) + (ratio_Mx + ratio_My)
+
+        ratio_V = V_sd_e / V_rd if V_rd > 0 else 0
+
+        delta_lim_mm = (vao_m * 1000.0) / 250.0
+        ratio_delta = delta_sd_mm / delta_lim_mm if delta_lim_mm > 0 else 0
+
+        taxa_maxima = max(taxa_interacao, ratio_V, ratio_delta)
+
+        return {
+            "perfil": nome_perfil,
+            "familia": perfil["familia"],
+            "aprovado": taxa_maxima <= 1.0,
+            "taxa_maxima": taxa_maxima * 100.0,
+            "taxa_interacao": taxa_interacao * 100.0,
+            "ratio_N": ratio_N * 100.0,
+            "ratio_Mx": ratio_Mx * 100.0,
+            "ratio_My": ratio_My * 100.0,
+            "ratio_V": ratio_V * 100.0,
+            "ratio_delta": ratio_delta * 100.0,
+            "M_rd_x": M_rd_x,
+            "M_rd_y": M_rd_y,
+            "V_rd": V_rd,
+            "N_rd": N_rd,
+            "delta_lim_mm": delta_lim_mm
+        }
+
 # =========================================================================================
 # FUNÇÕES DE INTERFACE E RELATÓRIO
 # =========================================================================================
@@ -205,16 +271,20 @@ Tolerância de Aprovação Aplicada: +{tolerancia:.1f}%
 1. DADOS GEOMÉTRICOS E DE CONTORNO
 ---------------------------------------------------------
 - Sistema Principal: {dados['sistema_principal']}
-- Tipo de Pilar: {dados['tipo_pilar']}
-- Pilares Rotação 90°: {'Sim' if dados.get('rotacionar_pilares') else 'Não'}
-- Vão Transversal (X): {dados['vao_x']:.2f} m
-- Comprimento Longitudinal (Y): {dados['comp_y']:.2f} m
-- Altura (Z): {dados['altura_z']:.2f} m
-- Espaçamento entre Pórticos: {dados['espacamento']:.2f} m
 """
-    if dados['sistema_principal'] == "Mezanino / Passarela Metálica":
-        relatorio += f"- Espaçamento entre Vigotas Transversais: {dados['espacamento_vigota']:.2f} m\n"
-        relatorio += f"- Tipo de Piso: {dados['tipo_piso']}\n"
+    if dados['sistema_principal'] != "Mão Francesa / Suporte (Plano 2D)":
+        relatorio += f"- Tipo de Pilar: {dados['tipo_pilar']}\n"
+        relatorio += f"- Pilares Rotação 90°: {'Sim' if dados.get('rotacionar_pilares') else 'Não'}\n"
+
+    relatorio += f"""- Vão Transversal (X): {dados['vao_x']:.2f} m
+- Altura (Z): {dados['altura_z']:.2f} m
+- Largura de Influência / Espaçamento: {dados['espacamento']:.2f} m
+"""
+    if dados['sistema_principal'] not in ["Mão Francesa / Suporte (Plano 2D)"]:
+        relatorio += f"- Comprimento Longitudinal (Y): {dados['comp_y']:.2f} m\n"
+        if dados['sistema_principal'] == "Mezanino / Passarela Metálica":
+            relatorio += f"- Espaçamento entre Vigotas Transversais: {dados['espacamento_vigota']:.2f} m\n"
+            relatorio += f"- Tipo de Piso: {dados['tipo_piso']}\n"
 
     relatorio += f"""
 2. CARGAS DE PROJETO (ELU - NBR 6120 / NBR 8800)
@@ -288,7 +358,7 @@ def gerar_relatorio_pdf(texto_memoria, res_analise=None, incluir_graficos=False)
         try:
             pdf.add_page()
             pdf.set_font("Courier", 'B', 12)
-            pdf.cell(0, 10, "6. ANEXO - DIAGRAMAS 3D", ln=True)
+            pdf.cell(0, 10, "6. ANEXO - DIAGRAMAS 3D/2D", ln=True)
             pdf.set_font("Courier", size=9)
             
             diagramas = ["Deslocamentos (Deformada)", "Momento Fletor (My)", "Reações de Apoio"]
@@ -318,7 +388,7 @@ def obter_propriedades(nome_perfil):
     return {"A": p["A"] * 1e-4, "Iy": p["Ix"] * 1e-8, "Iz": p["Iy"] * 1e-8, "J": (p["Iy"] * 1e-8) / 2.0}
 
 def main():
-    st.title("🏗️ Dimensionamento de Estruturas Metálicas 3D")
+    st.title("🏗️ Dimensionamento de Estruturas Metálicas")
     st.caption("Conformidade: NBR 8800 | NBR 6120 | NBR 6123")
 
     if "res_analise" not in st.session_state:
@@ -331,12 +401,18 @@ def main():
     st.sidebar.markdown("---")
 
     st.sidebar.title("Configurações Gerais")
-    sistema_principal = st.sidebar.selectbox("Sistema Principal", ["Pórtico Alma Cheia", "Tesoura Plana (Treliçada)", "Arco", "Mezanino / Passarela Metálica"])
-    tipo_pilar = st.sidebar.selectbox("Tipo de Pilar/Suporte", ["Pilar Metálico", "Pilar de Concreto Armado", "Sem Pilar"])
     
-    distribuicao_pilares = "Em todos os pórticos"
-    if tipo_pilar != "Sem Pilar":
-        distribuicao_pilares = st.sidebar.selectbox("Distribuição de Pilares", ["Em todos os pórticos", "Apenas nos 4 cantos extremos"])
+    # NOVA OPÇÃO 2D ADICIONADA AQUI
+    sistema_principal = st.sidebar.selectbox("Sistema Principal", ["Pórtico Alma Cheia", "Tesoura Plana (Treliçada)", "Arco", "Mezanino / Passarela Metálica", "Mão Francesa / Suporte (Plano 2D)"])
+    
+    if sistema_principal != "Mão Francesa / Suporte (Plano 2D)":
+        tipo_pilar = st.sidebar.selectbox("Tipo de Pilar/Suporte", ["Pilar Metálico", "Pilar de Concreto Armado", "Sem Pilar"])
+        distribuicao_pilares = "Em todos os pórticos"
+        if tipo_pilar != "Sem Pilar":
+            distribuicao_pilares = st.sidebar.selectbox("Distribuição de Pilares", ["Em todos os pórticos", "Apenas nos 4 cantos extremos"])
+    else:
+        tipo_pilar = "Pilar Metálico"
+        distribuicao_pilares = "N/A"
 
     n_paineis = 6
     espacamento_vigota = 1.0
@@ -347,18 +423,25 @@ def main():
     if sistema_principal == "Mezanino / Passarela Metálica":
         st.sidebar.markdown("**📐 Parâmetros do Piso/Passarela**")
         espacamento_vigota = st.sidebar.number_input("Espaçamento Vigotas Transversais [m]", min_value=0.40, max_value=3.00, value=1.00, step=0.10)
-    elif sistema_principal != "Arco":
+    elif sistema_principal not in ["Arco", "Mão Francesa / Suporte (Plano 2D)"]:
         forma_cobertura = st.sidebar.selectbox("Forma da Cobertura", ["2 Águas", "1 Água"])
         inclinacao = st.sidebar.number_input("Inclinação do Telhado [%]", min_value=1.0, max_value=100.0, value=10.0, step=1.0)
         if sistema_principal == "Tesoura Plana (Treliçada)":
             n_paineis = st.sidebar.slider("Número de Painéis da Treliça", min_value=2, max_value=60, value=6, step=2)
-    else:
+    elif sistema_principal == "Arco":
         flecha_arco = st.sidebar.number_input("Flecha do Arco (m)", min_value=1.0, max_value=20.0, value=3.0, step=0.5)
 
-    vao_x = st.sidebar.number_input("Vão Transversal (X) [m]", value=15.0 if sistema_principal != "Mezanino / Passarela Metálica" else 6.0)
-    comp_y = st.sidebar.number_input("Comprimento Longitudinal (Y) [m]", value=30.0 if sistema_principal != "Mezanino / Passarela Metálica" else 12.0)
-    altura_z = st.sidebar.number_input("Pé-direito / Altura (Z) [m]", value=6.0 if sistema_principal != "Mezanino / Passarela Metálica" else 3.0)
-    espacamento = st.sidebar.number_input("Espaçamento entre Pórticos [m]", value=5.0 if sistema_principal != "Mezanino / Passarela Metálica" else 3.0)
+    vao_x = st.sidebar.number_input("Vão Transversal (X) [m]", value=15.0 if sistema_principal not in ["Mezanino / Passarela Metálica", "Mão Francesa / Suporte (Plano 2D)"] else 6.0)
+    
+    if sistema_principal != "Mão Francesa / Suporte (Plano 2D)":
+        comp_y = st.sidebar.number_input("Comprimento Longitudinal (Y) [m]", value=30.0 if sistema_principal != "Mezanino / Passarela Metálica" else 12.0)
+    else:
+        comp_y = 0.0
+
+    altura_z = st.sidebar.number_input("Pé-direito / Altura (Z) [m]", value=6.0 if sistema_principal not in ["Mezanino / Passarela Metálica", "Mão Francesa / Suporte (Plano 2D)"] else 3.0)
+    
+    espacamento_label = "Largura de Influência [m] (Carga)" if sistema_principal == "Mão Francesa / Suporte (Plano 2D)" else "Espaçamento entre Pórticos [m]"
+    espacamento = st.sidebar.number_input(espacamento_label, value=5.0 if sistema_principal != "Mezanino / Passarela Metálica" else 3.0)
 
     st.sidebar.markdown("---")
     st.sidebar.subheader("⚙️ Perfis Estruturais")
@@ -371,6 +454,13 @@ def main():
         perf_v_prin = st.sidebar.selectbox("Vigas Principais (Longitudinais)", lista_perfis, index=lista_perfis.index("W 360 x 122 (Remontado)") if "W 360 x 122 (Remontado)" in lista_perfis else 0)
         perf_v_sec = st.sidebar.selectbox("Vigas Secundárias (Transversais)", lista_perfis, index=lista_perfis.index("W 150 x 18.0") if "W 150 x 18.0" in lista_perfis else 0)
         mapa_perfis = {"Pilares Metálicos": perf_pil, "Vigas Principais (Longitudinais)": perf_v_prin, "Vigas Secundárias (Transversais)": perf_v_sec}
+        
+    elif sistema_principal == "Mão Francesa / Suporte (Plano 2D)":
+        perf_pil = st.sidebar.selectbox("Fixação / Perfil Vertical", lista_perfis, index=lista_perfis.index("U 150 x 50 x 3.00") if "U 150 x 50 x 3.00" in lista_perfis else 0)
+        perf_v_prin = st.sidebar.selectbox("Viga Horizontal", lista_perfis, index=lista_perfis.index("U 150 x 50 x 3.00") if "U 150 x 50 x 3.00" in lista_perfis else 0)
+        perf_diag = st.sidebar.selectbox("Diagonal (Escora/Tirante)", lista_perfis, index=lista_perfis.index('2x L 2" x 3/16" (Dupla)') if '2x L 2" x 3/16" (Dupla)' in lista_perfis else 0)
+        mapa_perfis = {"Pilares Metálicos": perf_pil, "Vigas Principais (Longitudinais)": perf_v_prin, "Diagonais": perf_diag}
+        
     else:
         perf_pil = st.sidebar.selectbox("Pilares", lista_perfis, index=lista_perfis.index("W 250 x 25.3") if "W 250 x 25.3" in lista_perfis else 0) if tipo_pilar == "Pilar Metálico" else None
         perf_terca = st.sidebar.selectbox("Terças de Cobertura", lista_perfis, index=lista_perfis.index("U 100 x 40 x 2.25") if "U 100 x 40 x 2.25" in lista_perfis else 0)
@@ -385,7 +475,7 @@ def main():
     apoios_base = st.sidebar.selectbox("Vínculos na Base / Apoios", ["Engastado (Trava Translações e Rotações)", "Articulado (Trava apenas Translações)"])
     
     rotacionar_pilares = False
-    if tipo_pilar == "Pilar Metálico":
+    if tipo_pilar == "Pilar Metálico" and sistema_principal != "Mão Francesa / Suporte (Plano 2D)":
         rotacionar_pilares = st.sidebar.checkbox("Rotacionar Pilares em 90° (Eixo Forte na direção Y)", value=False)
         
     tolerancia_aceitacao = st.sidebar.number_input("Tolerância de Aceitação Máxima [%]", min_value=0.0, max_value=20.0, value=2.0, step=0.5)
@@ -408,6 +498,13 @@ def main():
         q_sobre = float(sobrecarga_opcao.split("(")[1].split(" ")[0])
         q_vento_liquido = 0.0
         q_elu = (1.25 * g_total) + (1.50 * q_sobre)
+    elif sistema_principal == "Mão Francesa / Suporte (Plano 2D)":
+        st.info("Para inserir uma Carga Linear [kN/m] direta, defina a Largura de Influência como 1.0 m acima.")
+        carga_permanente = st.sidebar.number_input("Carga Permanente Distribuída (G) [kN/m²]", min_value=0.0, value=0.50, step=0.10)
+        q_sobre = st.sidebar.number_input("Sobrecarga de Utilização (Q) [kN/m²]", min_value=0.0, value=1.50, step=0.10)
+        g_total = carga_permanente
+        q_vento_liquido = 0.0
+        q_elu = (1.25 * g_total) + (1.50 * q_sobre)
     else:
         tipo_telha = st.sidebar.selectbox("Tipo de Cobertura", ["Trapezoidal (0.05 kN/m²)", "Termoacústica (0.15 kN/m²)", "Fibrocimento (0.18 kN/m²)"])
         carga_inst = st.sidebar.number_input("Carga Instalações [kN/m²]", min_value=0.0, value=0.10, step=0.02)
@@ -423,8 +520,16 @@ def main():
 
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📐 Geometria", "🌪️ Cargas", "⚙️ Análise", "✅ Verificação", "📊 Diagramas", "📦 BIM"])
 
-    y_coords = np.arange(0, comp_y + espacamento, espacamento)
-    if y_coords[-1] != comp_y: y_coords[-1] = comp_y
+    # =========================================================================================
+    # GERADOR DE MALHA MATRICIAL
+    # =========================================================================================
+    
+    if sistema_principal == "Mão Francesa / Suporte (Plano 2D)":
+        y_coords = [0.0]
+    else:
+        y_coords = np.arange(0, comp_y + espacamento, espacamento)
+        if y_coords[-1] != comp_y: y_coords[-1] = comp_y
+        
     all_x, all_y, all_z, edges_raw = [], [], [], []
     has_pillar = (tipo_pilar != "Sem Pilar")
     
@@ -438,7 +543,18 @@ def main():
 
     apoios_idx = set()
 
-    if sistema_principal == "Mezanino / Passarela Metálica":
+    if sistema_principal == "Mão Francesa / Suporte (Plano 2D)":
+        n_tE = add_no(0, 0, altura_z)
+        n_tD = add_no(vao_x, 0, altura_z)
+        n_bE = add_no(0, 0, 0)
+        
+        edges_raw.append({"n1": n_bE, "n2": n_tE, "grupo": "Pilares Metálicos"})
+        edges_raw.append({"n1": n_tE, "n2": n_tD, "grupo": "Vigas Principais (Longitudinais)"})
+        edges_raw.append({"n1": n_bE, "n2": n_tD, "grupo": "Diagonais"})
+        
+        apoios_idx.update([n_tE, n_bE])
+
+    elif sistema_principal == "Mezanino / Passarela Metálica":
         y_vigotas = np.arange(0, comp_y + espacamento_vigota, espacamento_vigota)
         if y_vigotas[-1] != comp_y: y_vigotas[-1] = comp_y
         
@@ -595,9 +711,12 @@ def main():
     with tab2:
         st.subheader("🌪️ Detalhamento de Cargas (ELU)")
         st.info(f"**Carga de Projeto Total (q_ELU):** {q_elu:.2f} kN/m²")
+        if sistema_principal == "Mão Francesa / Suporte (Plano 2D)":
+            q_linear_exibida = q_elu * espacamento
+            st.success(f"Carga Linear aplicada na viga principal: **{q_linear_exibida:.2f} kN/m**")
 
     with tab3:
-        st.subheader("⚙️ Análise Estrutural Matricial 3D")
+        st.subheader("⚙️ Análise Estrutural Matricial")
         if st.button("🚀 Executar Análise com Matriz Específica", type="primary"):
             with st.spinner("Montando matriz global de rigidez ponderada..."):
                 motor = MotorCalculo3D()
@@ -633,18 +752,27 @@ def main():
                 nome_perfil = mapa_perfis.get(grupo)
                 if nome_perfil is None: continue 
                 
-                if grupo == "Vigas Secundárias (Transversais)":
-                    L_teorico = vao_x
-                elif grupo == "Vigas Principais (Longitudinais)":
-                    L_teorico = comp_y if distribuicao_pilares == "Apenas nos 4 cantos extremos" else espacamento
-                elif "Pilares" in grupo:
-                    L_teorico = altura_z
-                elif grupo == "Terças de Cobertura":
-                    L_teorico = espacamento
-                elif grupo in ["Banzo Superior", "Banzo Inferior"]:
-                    L_teorico = vao_x
+                # Tratamento de Vão Teórico adaptado para incluir 2D
+                if sistema_principal == "Mão Francesa / Suporte (Plano 2D)":
+                    if grupo == "Vigas Principais (Longitudinais)":
+                        L_teorico = vao_x
+                    elif "Pilares" in grupo:
+                        L_teorico = altura_z
+                    else:
+                        L_teorico = esf_grp.get("L_max", vao_x)
                 else:
-                    L_teorico = esf_grp.get("L_max", vao_x)
+                    if grupo == "Vigas Secundárias (Transversais)":
+                        L_teorico = vao_x
+                    elif grupo == "Vigas Principais (Longitudinais)":
+                        L_teorico = comp_y if distribuicao_pilares == "Apenas nos 4 cantos extremos" else espacamento
+                    elif "Pilares" in grupo:
+                        L_teorico = altura_z
+                    elif grupo == "Terças de Cobertura":
+                        L_teorico = espacamento
+                    elif grupo in ["Banzo Superior", "Banzo Inferior"]:
+                        L_teorico = vao_x
+                    else:
+                        L_teorico = esf_grp.get("L_max", vao_x)
 
                 v = verificador.verificar_elemento(
                     nome_perfil, 
