@@ -10,10 +10,13 @@ try:
 except ImportError:
     FPDF = None
 
+from modules.solver import MotorCalculo3D
+from modules.checker import VerificadorNBR8800, PROPRIEDADES_ACO
+
 st.set_page_config(page_title="Dimensionador Metálico 3D", page_icon="🏗️", layout="wide")
 
 # =========================================================================================
-# BANCO DE DADOS DE PERFIS ATUALIZADO (INCLUINDO CHAPA 10 PARA TODOS OS PERFIS)
+# BANCO DE DADOS DE PERFIS ATUALIZADO
 # =========================================================================================
 
 CATALOGO_LAMINADOS = {
@@ -31,47 +34,34 @@ CATALOGO_LAMINADOS = {
 }
 
 CATALOGO_CHAPA_DOBRADA = {
-    # --- U Simples 50 x 25 ---
     "U 50 x 25 x 2.00": {"familia": "Chapa Dobrada U", "d": 50, "bf": 25, "tw": 2.00, "tf": 2.00, "A": 1.75, "Ix": 6.66, "Iy": 1.07, "Wx": 2.60, "Wy": 0.60},
     "U 50 x 25 x 2.25": {"familia": "Chapa Dobrada U", "d": 50, "bf": 25, "tw": 2.25, "tf": 2.25, "A": 1.95, "Ix": 7.40, "Iy": 1.19, "Wx": 2.96, "Wy": 0.66},
     "U 50 x 25 x 2.65": {"familia": "Chapa Dobrada U", "d": 50, "bf": 25, "tw": 2.65, "tf": 2.65, "A": 2.27, "Ix": 8.55, "Iy": 1.38, "Wx": 3.42, "Wy": 0.76},
     "U 50 x 25 x 3.00": {"familia": "Chapa Dobrada U", "d": 50, "bf": 25, "tw": 3.00, "tf": 3.00, "A": 2.54, "Ix": 9.50, "Iy": 1.52, "Wx": 3.80, "Wy": 0.84},
     "U 50 x 25 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 50, "bf": 25, "tw": 3.35, "tf": 3.35, "A": 2.81, "Ix": 10.40, "Iy": 1.65, "Wx": 4.16, "Wy": 0.91},
-
-    # --- U Simples 75 x 38 ---
     "U 75 x 38 x 2.00": {"familia": "Chapa Dobrada U", "d": 75, "bf": 38, "tw": 2.00, "tf": 2.00, "A": 2.80, "Ix": 25.10, "Iy": 4.55, "Wx": 6.60, "Wy": 1.58},
     "U 75 x 38 x 2.25": {"familia": "Chapa Dobrada U", "d": 75, "bf": 38, "tw": 2.25, "tf": 2.25, "A": 3.13, "Ix": 27.90, "Iy": 5.05, "Wx": 7.44, "Wy": 1.75},
     "U 75 x 38 x 2.65": {"familia": "Chapa Dobrada U", "d": 75, "bf": 38, "tw": 2.65, "tf": 2.65, "A": 3.65, "Ix": 32.40, "Iy": 5.85, "Wx": 8.64, "Wy": 2.02},
     "U 75 x 38 x 3.00": {"familia": "Chapa Dobrada U", "d": 75, "bf": 38, "tw": 3.00, "tf": 3.00, "A": 4.09, "Ix": 36.10, "Iy": 6.50, "Wx": 9.62, "Wy": 2.24},
     "U 75 x 38 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 75, "bf": 38, "tw": 3.35, "tf": 3.35, "A": 4.52, "Ix": 39.70, "Iy": 7.10, "Wx": 10.58, "Wy": 2.45},
-
-    # --- U Simples 75 x 40 ---
     "U 75 x 40 x 2.00": {"familia": "Chapa Dobrada U", "d": 75, "bf": 40, "tw": 2.00, "tf": 2.00, "A": 2.80, "Ix": 25.10, "Iy": 4.55, "Wx": 6.60, "Wy": 1.58},
     "U 75 x 40 x 2.65": {"familia": "Chapa Dobrada U", "d": 75, "bf": 40, "tw": 2.65, "tf": 2.65, "A": 3.75, "Ix": 32.20, "Iy": 5.80, "Wx": 8.50, "Wy": 2.05},
     "U 75 x 40 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 75, "bf": 40, "tw": 3.35, "tf": 3.35, "A": 4.60, "Ix": 38.50, "Iy": 6.90, "Wx": 10.20, "Wy": 2.50},
-
-    # --- U Simples 100 x 40 & 100 x 50 ---
     "U 100 x 40 x 2.25": {"familia": "Chapa Dobrada U", "d": 100, "bf": 40, "tw": 2.25, "tf": 2.25, "A": 3.89, "Ix": 57.67, "Iy": 5.89, "Wx": 11.50, "Wy": 1.96},
     "U 100 x 50 x 2.00": {"familia": "Chapa Dobrada U", "d": 100, "bf": 50, "tw": 2.00, "tf": 2.00, "A": 3.65, "Ix": 58.15, "Iy": 9.24, "Wx": 11.60, "Wy": 2.52},
     "U 100 x 50 x 2.25": {"familia": "Chapa Dobrada U", "d": 100, "bf": 50, "tw": 2.25, "tf": 2.25, "A": 4.35, "Ix": 68.55, "Iy": 10.94, "Wx": 13.70, "Wy": 3.00},
     "U 100 x 50 x 2.65": {"familia": "Chapa Dobrada U", "d": 100, "bf": 50, "tw": 2.65, "tf": 2.65, "A": 5.04, "Ix": 78.60, "Iy": 12.59, "Wx": 15.70, "Wy": 3.48},
     "U 100 x 50 x 3.00": {"familia": "Chapa Dobrada U", "d": 100, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 5.71, "Ix": 88.29, "Iy": 14.20, "Wx": 17.60, "Wy": 3.94},
     "U 100 x 50 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 100, "bf": 50, "tw": 3.35, "tf": 3.35, "A": 6.30, "Ix": 96.10, "Iy": 15.60, "Wx": 19.20, "Wy": 4.40},
-
-    # --- U Simples 127 x 50 ---
     "U 127 x 50 x 2.00": {"familia": "Chapa Dobrada U", "d": 127, "bf": 50, "tw": 2.00, "tf": 2.00, "A": 4.38, "Ix": 106.0, "Iy": 10.40, "Wx": 16.70, "Wy": 2.80},
     "U 127 x 50 x 2.25": {"familia": "Chapa Dobrada U", "d": 127, "bf": 50, "tw": 2.25, "tf": 2.25, "A": 4.90, "Ix": 118.0, "Iy": 11.60, "Wx": 18.60, "Wy": 3.10},
     "U 127 x 50 x 2.65": {"familia": "Chapa Dobrada U", "d": 127, "bf": 50, "tw": 2.65, "tf": 2.65, "A": 5.75, "Ix": 138.0, "Iy": 13.50, "Wx": 21.70, "Wy": 3.60},
     "U 127 x 50 x 3.00": {"familia": "Chapa Dobrada U", "d": 127, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 6.53, "Ix": 154.8, "Iy": 15.32, "Wx": 24.30, "Wy": 4.08},
     "U 127 x 50 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 127, "bf": 50, "tw": 3.35, "tf": 3.35, "A": 7.20, "Ix": 171.0, "Iy": 16.70, "Wx": 26.90, "Wy": 4.50},
-
-    # --- U Simples 150 x 50 ---
     "U 150 x 50 x 2.00": {"familia": "Chapa Dobrada U", "d": 150, "bf": 50, "tw": 2.00, "tf": 2.00, "A": 4.84, "Ix": 160.0, "Iy": 10.70, "Wx": 21.30, "Wy": 2.80},
     "U 150 x 50 x 2.65": {"familia": "Chapa Dobrada U", "d": 150, "bf": 50, "tw": 2.65, "tf": 2.65, "A": 6.36, "Ix": 208.0, "Iy": 13.80, "Wx": 27.70, "Wy": 3.70},
     "U 150 x 50 x 3.00": {"familia": "Chapa Dobrada U", "d": 150, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 7.23, "Ix": 230.1, "Iy": 16.08, "Wx": 30.60, "Wy": 4.16},
     "U 150 x 50 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 150, "bf": 50, "tw": 3.35, "tf": 3.35, "A": 7.97, "Ix": 257.0, "Iy": 17.10, "Wx": 34.30, "Wy": 4.60},
-
-    # --- U Simples 200 x 75 ---
     "U 200 x 75 x 2.65": {"familia": "Chapa Dobrada U", "d": 200, "bf": 75, "tw": 2.65, "tf": 2.65, "A": 9.01, "Ix": 538.0, "Iy": 49.30, "Wx": 53.80, "Wy": 9.20},
     "U 200 x 75 x 3.00": {"familia": "Chapa Dobrada U", "d": 200, "bf": 75, "tw": 3.00, "tf": 3.00, "A": 10.10, "Ix": 604.0, "Iy": 55.40, "Wx": 60.40, "Wy": 10.30},
     "U 200 x 75 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 200, "bf": 75, "tw": 3.35, "tf": 3.35, "A": 11.30, "Ix": 668.0, "Iy": 61.30, "Wx": 66.80, "Wy": 11.40},
@@ -79,25 +69,21 @@ CATALOGO_CHAPA_DOBRADA = {
     # --- U Enrijecido ---
     "UE 75 x 40 x 15 x 2.00": {"familia": "U Enrijecido", "d": 75, "bf": 40, "tw": 2.00, "tf": 2.00, "A": 3.62, "Ix": 33.2, "Iy": 8.1, "Wx": 8.8, "Wy": 2.6},
     "UE 75 x 40 x 15 x 2.65": {"familia": "U Enrijecido", "d": 75, "bf": 40, "tw": 2.65, "tf": 2.65, "A": 4.65, "Ix": 41.5, "Iy": 9.9, "Wx": 11.0, "Wy": 3.2},
-    
     "UE 100 x 50 x 17 x 2.00": {"familia": "U Enrijecido", "d": 100, "bf": 50, "tw": 2.00, "tf": 2.00, "A": 4.56, "Ix": 71.0, "Iy": 15.6, "Wx": 14.2, "Wy": 4.2},
     "UE 100 x 50 x 17 x 2.25": {"familia": "U Enrijecido", "d": 100, "bf": 50, "tw": 2.25, "tf": 2.25, "A": 4.88, "Ix": 78.4, "Iy": 15.1, "Wx": 15.68, "Wy": 4.25},
     "UE 100 x 50 x 17 x 2.65": {"familia": "U Enrijecido", "d": 100, "bf": 50, "tw": 2.65, "tf": 2.65, "A": 5.92, "Ix": 90.4, "Iy": 19.8, "Wx": 18.0, "Wy": 5.4},
     "UE 100 x 50 x 17 x 3.00": {"familia": "U Enrijecido", "d": 100, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 6.64, "Ix": 100.1, "Iy": 21.8, "Wx": 20.0, "Wy": 6.0},
     "UE 100 x 50 x 17 x 3.35": {"familia": "U Enrijecido (Chapa 10)", "d": 100, "bf": 50, "tw": 3.35, "tf": 3.35, "A": 7.34, "Ix": 109.1, "Iy": 23.6, "Wx": 21.8, "Wy": 6.5},
-
     "UE 127 x 50 x 17 x 2.00": {"familia": "U Enrijecido", "d": 127, "bf": 50, "tw": 2.00, "tf": 2.00, "A": 5.10, "Ix": 125.0, "Iy": 16.4, "Wx": 19.7, "Wy": 4.3},
     "UE 127 x 50 x 17 x 2.25": {"familia": "U Enrijecido", "d": 127, "bf": 50, "tw": 2.25, "tf": 2.25, "A": 5.71, "Ix": 139.0, "Iy": 18.2, "Wx": 21.9, "Wy": 4.8},
     "UE 127 x 50 x 17 x 2.65": {"familia": "U Enrijecido", "d": 127, "bf": 50, "tw": 2.65, "tf": 2.65, "A": 6.46, "Ix": 161.0, "Iy": 18.2, "Wx": 25.35, "Wy": 4.98},
     "UE 127 x 50 x 17 x 3.00": {"familia": "U Enrijecido", "d": 127, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 7.45, "Ix": 179.0, "Iy": 23.1, "Wx": 28.2, "Wy": 6.1},
     "UE 127 x 50 x 17 x 3.35": {"familia": "U Enrijecido (Chapa 10)", "d": 127, "bf": 50, "tw": 3.35, "tf": 3.35, "A": 8.24, "Ix": 195.0, "Iy": 25.1, "Wx": 30.7, "Wy": 6.7},
-
     "UE 150 x 60 x 20 x 2.00": {"familia": "U Enrijecido", "d": 150, "bf": 60, "tw": 2.00, "tf": 2.00, "A": 6.16, "Ix": 215.0, "Iy": 30.0, "Wx": 28.6, "Wy": 6.6},
     "UE 150 x 60 x 20 x 2.25": {"familia": "U Enrijecido", "d": 150, "bf": 60, "tw": 2.25, "tf": 2.25, "A": 6.90, "Ix": 239.0, "Iy": 33.3, "Wx": 31.8, "Wy": 7.4},
     "UE 150 x 60 x 20 x 2.65": {"familia": "U Enrijecido", "d": 150, "bf": 60, "tw": 2.65, "tf": 2.65, "A": 8.04, "Ix": 277.0, "Iy": 38.3, "Wx": 36.9, "Wy": 8.5},
     "UE 150 x 60 x 20 x 3.00": {"familia": "U Enrijecido", "d": 150, "bf": 60, "tw": 3.00, "tf": 3.00, "A": 8.70, "Ix": 308.2, "Iy": 35.8, "Wx": 41.09, "Wy": 8.32},
     "UE 150 x 60 x 20 x 3.35": {"familia": "U Enrijecido (Chapa 10)", "d": 150, "bf": 60, "tw": 3.35, "tf": 3.35, "A": 10.0, "Ix": 340.0, "Iy": 46.5, "Wx": 45.3, "Wy": 10.4},
-
     "UE 200 x 75 x 20 x 2.65": {"familia": "U Enrijecido", "d": 200, "bf": 75, "tw": 2.65, "tf": 2.65, "A": 10.1, "Ix": 604.0, "Iy": 72.8, "Wx": 60.4, "Wy": 13.0},
     "UE 200 x 75 x 20 x 3.00": {"familia": "U Enrijecido", "d": 200, "bf": 75, "tw": 3.00, "tf": 3.00, "A": 11.4, "Ix": 676.0, "Iy": 81.3, "Wx": 67.6, "Wy": 14.5},
     "UE 200 x 75 x 20 x 3.35": {"familia": "U Enrijecido (Chapa 10)", "d": 200, "bf": 75, "tw": 3.35, "tf": 3.35, "A": 12.6, "Ix": 746.0, "Iy": 89.2, "Wx": 74.6, "Wy": 16.0},
@@ -392,106 +378,6 @@ class MotorCalculo3D:
         except Exception as e:
             return {"sucesso": False, "erro": str(e)}
 
-class VerificadorNBR8800:
-    def __init__(self, tipo_aco="ASTM A572 Gr 50"):
-        self.aco = PROPRIEDADES_ACO.get(tipo_aco, PROPRIEDADES_ACO["ASTM A572 Gr 50"])
-        self.gamma_a1 = 1.10
-        self.E_cm = 20000.0  
-
-    def verificar_elemento(self, nome_perfil, N_trac_sd, N_comp_sd, V_sd, My_sd, Mz_sd, delta_sd_mm, vao_m, fator_esforso=1.0):
-        perfil = CATALOGO_COMPLETO.get(nome_perfil, CATALOGO_LAMINADOS["W 200 x 22.5"])
-        fy = self.aco["fy"] / 10.0  
-        A = perfil["A"]
-        Ix = perfil["Ix"]
-        Iy = perfil["Iy"]
-        Wx = perfil["Wx"]
-        Wy = perfil.get("Wy", 0.1)
-        d = perfil["d"] / 10.0
-        tw = perfil["tw"] / 10.0
-
-        N_trac_sd_e = N_trac_sd * fator_esforso
-        N_comp_sd_e = N_comp_sd * fator_esforso
-        V_sd_e = abs(V_sd) * fator_esforso
-        My_sd_e = abs(My_sd) * fator_esforso  
-        Mz_sd_e = abs(Mz_sd) * fator_esforso  
-
-        L_cm = vao_m * 100.0
-        Kx = 1.0  
-        Ky = 1.0
-        
-        rx = np.sqrt(Ix / A) if A > 0 else 1e-5
-        ry = np.sqrt(Iy / A) if A > 0 else 1e-5
-        
-        esbeltez_x = (Kx * L_cm) / rx
-        esbeltez_y = (Ky * L_cm) / ry
-        esbeltez_max = max(esbeltez_x, esbeltez_y)
-        
-        Q = 1.0 
-        
-        Ne = (np.pi**2 * self.E_cm * A) / (esbeltez_max**2) if esbeltez_max > 0 else 1e9
-        
-        lambda_0 = np.sqrt((Q * A * fy) / Ne) if Ne > 0 else 999.0
-        
-        if lambda_0 <= 1.5:
-            chi = 0.658 ** (lambda_0**2)
-        else:
-            chi = 0.877 / (lambda_0**2)
-            
-        M_rd_x = (Wx * fy) / (100.0 * self.gamma_a1)  
-        M_rd_y = (Wy * fy) / (100.0 * self.gamma_a1)
-        
-        Av = d * tw
-        V_rd = (0.60 * Av * fy) / self.gamma_a1
-        
-        N_rd_trac = (A * fy) / self.gamma_a1
-        N_rd_comp = (chi * Q * A * fy) / self.gamma_a1
-
-        ratio_N_trac = N_trac_sd_e / N_rd_trac if N_rd_trac > 0 else 0
-        ratio_N_comp = N_comp_sd_e / N_rd_comp if N_rd_comp > 0 else 0
-        ratio_N_max = max(ratio_N_trac, ratio_N_comp)
-        
-        ratio_Mx = My_sd_e / M_rd_x if M_rd_x > 0 else 0
-        ratio_My = Mz_sd_e / M_rd_y if M_rd_y > 0 else 0
-
-        if ratio_N_max >= 0.2:
-            taxa_interacao = ratio_N_max + (8.0/9.0) * (ratio_Mx + ratio_My)
-        else:
-            taxa_interacao = (ratio_N_max / 2.0) + (ratio_Mx + ratio_My)
-
-        ratio_V = V_sd_e / V_rd if V_rd > 0 else 0
-
-        delta_lim_mm = (vao_m * 1000.0) / 250.0
-        ratio_delta = delta_sd_mm / delta_lim_mm if delta_lim_mm > 0 else 0
-
-        taxa_maxima = max(taxa_interacao, ratio_V, ratio_delta)
-
-        return {
-            "perfil": nome_perfil,
-            "familia": perfil["familia"],
-            "aprovado": taxa_maxima <= 1.0,
-            "taxa_maxima": taxa_maxima * 100.0,
-            "taxa_interacao": taxa_interacao * 100.0,
-            "ratio_N": ratio_N_max * 100.0,
-            "ratio_N_trac": ratio_N_trac * 100.0,
-            "ratio_N_comp": ratio_N_comp * 100.0,
-            "ratio_Mx": ratio_Mx * 100.0,
-            "ratio_My": ratio_My * 100.0,
-            "ratio_V": ratio_V * 100.0,
-            "ratio_delta": ratio_delta * 100.0,
-            "M_rd_x": M_rd_x,
-            "M_rd_y": M_rd_y,
-            "V_rd": V_rd,
-            "N_rd_trac": N_rd_trac,
-            "N_rd_comp": N_rd_comp,
-            "chi": chi,
-            "esbeltez_max": esbeltez_max,
-            "Ne": Ne,
-            "lambda_0": lambda_0,
-            "rx": rx,
-            "ry": ry,
-            "delta_lim_mm": delta_lim_mm
-        }
-
 def desenhar_diagrama(res, tipo_diagrama):
     fig = go.Figure()
     nos, barras, esforcos = res["nos"], res["barras"], res["esforcos"]
@@ -650,7 +536,6 @@ Tolerância de Aprovação Aplicada: +{tolerancia:.1f}%
 """
     if dados['sistema_principal'] != "Mão Francesa / Suporte (Plano 2D)":
         relatorio += f"- Tipo de Pilar: {dados['tipo_pilar']}\n"
-        relatorio += f"- Ângulo Giro dos Pilares: {dados.get('ang_pilares', 0.0):.1f}°\n"
 
     relatorio += f"""- Vão Transversal (X): {dados['vao_x']:.2f} m
 - Altura (Z): {dados['altura_z']:.2f} m
@@ -697,11 +582,9 @@ Coeficiente de Minoração (γ_a1) = {gamma_a1}
 """
     for v in resultados_comp:
         perf = CATALOGO_COMPLETO[v['perfil']]
-        A = perf['A']
-        Wx = perf['Wx']
+        A, Wx = perf['A'], perf['Wx']
         Wy = perf.get('Wy', 0.1)
-        d = perf['d'] / 10.0
-        tw = perf['tw'] / 10.0
+        d, tw = perf['d'] / 10.0, perf['tw'] / 10.0
         Av = d * tw
         status_comp = "APROVADO (COM TOLERÂNCIA)" if v['aprovado'] and v['taxa_maxima'] > 100.0 else ("APROVADO" if v['aprovado'] else "REPROVADO")
 
@@ -782,7 +665,6 @@ def main():
     st.sidebar.markdown("---")
 
     st.sidebar.title("Configurações Gerais")
-    
     sistema_principal = st.sidebar.selectbox("Sistema Principal", ["Pórtico Alma Cheia", "Tesoura Plana (Treliçada)", "Arco", "Mezanino / Passarela Metálica", "Mão Francesa / Suporte (Plano 2D)"])
     
     if sistema_principal != "Mão Francesa / Suporte (Plano 2D)":
@@ -841,13 +723,14 @@ def main():
         mapa_perfis = {"Pilares Metálicos": perf_pil, "Terças de Cobertura": perf_terca, "Banzo Superior": perf_bz_sup, "Banzo Inferior": perf_bz_inf, "Diagonais": perf_diag, "Montantes": perf_mont}
 
     st.sidebar.markdown("---")
+    st.sidebar.subheader("🔄 Giro dos Eixos Locais (Beta)")
+    angulos_grupos = {}
+    for grupo in mapa_perfis.keys():
+        angulos_grupos[grupo] = st.sidebar.number_input(f"Giro: {grupo} [°]", min_value=-360.0, max_value=360.0, value=0.0, step=45.0)
+
+    st.sidebar.markdown("---")
     st.sidebar.subheader("⚖️ Condições e Aceitação")
     apoios_base = st.sidebar.selectbox("Vínculos na Base / Apoios", ["Engastado (Trava Translações e Rotações)", "Articulado (Trava apenas Translações)"])
-    
-    ang_pilares = 0.0
-    if tipo_pilar == "Pilar Metálico" and sistema_principal != "Mão Francesa / Suporte (Plano 2D)":
-        ang_pilares = st.sidebar.number_input("Ângulo de Rotação dos Pilares (Giro) [°]", min_value=0.0, max_value=360.0, value=0.0, step=90.0)
-        
     tolerancia_aceitacao = st.sidebar.number_input("Tolerância de Aceitação Máxima [%]", min_value=0.0, max_value=20.0, value=2.0, step=0.5)
 
     st.sidebar.markdown("---")
@@ -997,7 +880,8 @@ def main():
         nome_perf = mapa_perfis.get(grp)
         if nome_perf is None: continue 
         props = obter_propriedades(nome_perf)
-        ang = ang_pilares if (grp == "Pilares Metálicos") else 0.0
+        
+        ang = angulos_grupos.get(grp, 0.0)
         barras_prontas.append({"n1": edge["n1"], "n2": edge["n2"], "grupo": grp, "A": props["A"], "Iy": props["Iy"], "Iz": props["Iz"], "J": props["J"], "ang": ang})
 
     with tab1:
@@ -1087,8 +971,7 @@ def main():
                     "distribuicao_pilares": distribuicao_pilares, "vao_x": vao_x, "comp_y": comp_y, 
                     "altura_z": altura_z, "espacamento": espacamento, "espacamento_vigota": espacamento_vigota,
                     "g_total": g_total, "q_sobre": q_sobre, "q_elu": q_elu, "tipo_aco": tipo_aco, 
-                    "q_vento_liquido": q_vento_liquido, "tipo_piso": tipo_piso if sistema_principal == "Mezanino / Passarela Metálica" else "N/A",
-                    "ang_pilares": ang_pilares
+                    "q_vento_liquido": q_vento_liquido, "tipo_piso": tipo_piso if sistema_principal == "Mezanino / Passarela Metálica" else "N/A"
                 }
                 texto_memoria = gerar_relatorio_txt(dados_r, res, resultados_comp, tudo_aprovado, tolerancia_aceitacao)
                 
