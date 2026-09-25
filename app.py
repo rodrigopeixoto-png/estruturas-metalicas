@@ -10,8 +10,10 @@ try:
 except ImportError:
     FPDF = None
 
+st.set_page_config(page_title="Dimensionador Metálico 3D", page_icon="🏗️", layout="wide")
+
 # =========================================================================================
-# BANCO DE DADOS DE PERFIS 
+# BANCO DE DADOS DE PERFIS ATUALIZADO (INCLUINDO CHAPA 10 PARA TODOS OS PERFIS)
 # =========================================================================================
 
 CATALOGO_LAMINADOS = {
@@ -29,19 +31,76 @@ CATALOGO_LAMINADOS = {
 }
 
 CATALOGO_CHAPA_DOBRADA = {
+    # --- U Simples 50 x 25 ---
     "U 50 x 25 x 2.00": {"familia": "Chapa Dobrada U", "d": 50, "bf": 25, "tw": 2.00, "tf": 2.00, "A": 1.75, "Ix": 6.66, "Iy": 1.07, "Wx": 2.60, "Wy": 0.60},
+    "U 50 x 25 x 2.25": {"familia": "Chapa Dobrada U", "d": 50, "bf": 25, "tw": 2.25, "tf": 2.25, "A": 1.95, "Ix": 7.40, "Iy": 1.19, "Wx": 2.96, "Wy": 0.66},
+    "U 50 x 25 x 2.65": {"familia": "Chapa Dobrada U", "d": 50, "bf": 25, "tw": 2.65, "tf": 2.65, "A": 2.27, "Ix": 8.55, "Iy": 1.38, "Wx": 3.42, "Wy": 0.76},
+    "U 50 x 25 x 3.00": {"familia": "Chapa Dobrada U", "d": 50, "bf": 25, "tw": 3.00, "tf": 3.00, "A": 2.54, "Ix": 9.50, "Iy": 1.52, "Wx": 3.80, "Wy": 0.84},
+    "U 50 x 25 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 50, "bf": 25, "tw": 3.35, "tf": 3.35, "A": 2.81, "Ix": 10.40, "Iy": 1.65, "Wx": 4.16, "Wy": 0.91},
+
+    # --- U Simples 75 x 38 ---
     "U 75 x 38 x 2.00": {"familia": "Chapa Dobrada U", "d": 75, "bf": 38, "tw": 2.00, "tf": 2.00, "A": 2.80, "Ix": 25.10, "Iy": 4.55, "Wx": 6.60, "Wy": 1.58},
+    "U 75 x 38 x 2.25": {"familia": "Chapa Dobrada U", "d": 75, "bf": 38, "tw": 2.25, "tf": 2.25, "A": 3.13, "Ix": 27.90, "Iy": 5.05, "Wx": 7.44, "Wy": 1.75},
+    "U 75 x 38 x 2.65": {"familia": "Chapa Dobrada U", "d": 75, "bf": 38, "tw": 2.65, "tf": 2.65, "A": 3.65, "Ix": 32.40, "Iy": 5.85, "Wx": 8.64, "Wy": 2.02},
+    "U 75 x 38 x 3.00": {"familia": "Chapa Dobrada U", "d": 75, "bf": 38, "tw": 3.00, "tf": 3.00, "A": 4.09, "Ix": 36.10, "Iy": 6.50, "Wx": 9.62, "Wy": 2.24},
+    "U 75 x 38 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 75, "bf": 38, "tw": 3.35, "tf": 3.35, "A": 4.52, "Ix": 39.70, "Iy": 7.10, "Wx": 10.58, "Wy": 2.45},
+
+    # --- U Simples 75 x 40 ---
+    "U 75 x 40 x 2.00": {"familia": "Chapa Dobrada U", "d": 75, "bf": 40, "tw": 2.00, "tf": 2.00, "A": 2.80, "Ix": 25.10, "Iy": 4.55, "Wx": 6.60, "Wy": 1.58},
+    "U 75 x 40 x 2.65": {"familia": "Chapa Dobrada U", "d": 75, "bf": 40, "tw": 2.65, "tf": 2.65, "A": 3.75, "Ix": 32.20, "Iy": 5.80, "Wx": 8.50, "Wy": 2.05},
+    "U 75 x 40 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 75, "bf": 40, "tw": 3.35, "tf": 3.35, "A": 4.60, "Ix": 38.50, "Iy": 6.90, "Wx": 10.20, "Wy": 2.50},
+
+    # --- U Simples 100 x 40 & 100 x 50 ---
     "U 100 x 40 x 2.25": {"familia": "Chapa Dobrada U", "d": 100, "bf": 40, "tw": 2.25, "tf": 2.25, "A": 3.89, "Ix": 57.67, "Iy": 5.89, "Wx": 11.50, "Wy": 1.96},
     "U 100 x 50 x 2.00": {"familia": "Chapa Dobrada U", "d": 100, "bf": 50, "tw": 2.00, "tf": 2.00, "A": 3.65, "Ix": 58.15, "Iy": 9.24, "Wx": 11.60, "Wy": 2.52},
     "U 100 x 50 x 2.25": {"familia": "Chapa Dobrada U", "d": 100, "bf": 50, "tw": 2.25, "tf": 2.25, "A": 4.35, "Ix": 68.55, "Iy": 10.94, "Wx": 13.70, "Wy": 3.00},
     "U 100 x 50 x 2.65": {"familia": "Chapa Dobrada U", "d": 100, "bf": 50, "tw": 2.65, "tf": 2.65, "A": 5.04, "Ix": 78.60, "Iy": 12.59, "Wx": 15.70, "Wy": 3.48},
     "U 100 x 50 x 3.00": {"familia": "Chapa Dobrada U", "d": 100, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 5.71, "Ix": 88.29, "Iy": 14.20, "Wx": 17.60, "Wy": 3.94},
-    "U 127 x 50 x 3.00": {"familia": "Chapa Dobrada U", "d": 127, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 6.53, "Ix": 154.80, "Iy": 15.32, "Wx": 24.30, "Wy": 4.08},
-    "U 150 x 50 x 3.00": {"familia": "Chapa Dobrada U", "d": 150, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 7.23, "Ix": 230.10, "Iy": 16.08, "Wx": 30.60, "Wy": 4.16},
-    "U 200 x 50 x 3.00": {"familia": "Chapa Dobrada U", "d": 200, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 8.75, "Ix": 462.40, "Iy": 17.31, "Wx": 46.20, "Wy": 4.29},
+    "U 100 x 50 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 100, "bf": 50, "tw": 3.35, "tf": 3.35, "A": 6.30, "Ix": 96.10, "Iy": 15.60, "Wx": 19.20, "Wy": 4.40},
+
+    # --- U Simples 127 x 50 ---
+    "U 127 x 50 x 2.00": {"familia": "Chapa Dobrada U", "d": 127, "bf": 50, "tw": 2.00, "tf": 2.00, "A": 4.38, "Ix": 106.0, "Iy": 10.40, "Wx": 16.70, "Wy": 2.80},
+    "U 127 x 50 x 2.25": {"familia": "Chapa Dobrada U", "d": 127, "bf": 50, "tw": 2.25, "tf": 2.25, "A": 4.90, "Ix": 118.0, "Iy": 11.60, "Wx": 18.60, "Wy": 3.10},
+    "U 127 x 50 x 2.65": {"familia": "Chapa Dobrada U", "d": 127, "bf": 50, "tw": 2.65, "tf": 2.65, "A": 5.75, "Ix": 138.0, "Iy": 13.50, "Wx": 21.70, "Wy": 3.60},
+    "U 127 x 50 x 3.00": {"familia": "Chapa Dobrada U", "d": 127, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 6.53, "Ix": 154.8, "Iy": 15.32, "Wx": 24.30, "Wy": 4.08},
+    "U 127 x 50 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 127, "bf": 50, "tw": 3.35, "tf": 3.35, "A": 7.20, "Ix": 171.0, "Iy": 16.70, "Wx": 26.90, "Wy": 4.50},
+
+    # --- U Simples 150 x 50 ---
+    "U 150 x 50 x 2.00": {"familia": "Chapa Dobrada U", "d": 150, "bf": 50, "tw": 2.00, "tf": 2.00, "A": 4.84, "Ix": 160.0, "Iy": 10.70, "Wx": 21.30, "Wy": 2.80},
+    "U 150 x 50 x 2.65": {"familia": "Chapa Dobrada U", "d": 150, "bf": 50, "tw": 2.65, "tf": 2.65, "A": 6.36, "Ix": 208.0, "Iy": 13.80, "Wx": 27.70, "Wy": 3.70},
+    "U 150 x 50 x 3.00": {"familia": "Chapa Dobrada U", "d": 150, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 7.23, "Ix": 230.1, "Iy": 16.08, "Wx": 30.60, "Wy": 4.16},
+    "U 150 x 50 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 150, "bf": 50, "tw": 3.35, "tf": 3.35, "A": 7.97, "Ix": 257.0, "Iy": 17.10, "Wx": 34.30, "Wy": 4.60},
+
+    # --- U Simples 200 x 75 ---
+    "U 200 x 75 x 2.65": {"familia": "Chapa Dobrada U", "d": 200, "bf": 75, "tw": 2.65, "tf": 2.65, "A": 9.01, "Ix": 538.0, "Iy": 49.30, "Wx": 53.80, "Wy": 9.20},
+    "U 200 x 75 x 3.00": {"familia": "Chapa Dobrada U", "d": 200, "bf": 75, "tw": 3.00, "tf": 3.00, "A": 10.10, "Ix": 604.0, "Iy": 55.40, "Wx": 60.40, "Wy": 10.30},
+    "U 200 x 75 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 200, "bf": 75, "tw": 3.35, "tf": 3.35, "A": 11.30, "Ix": 668.0, "Iy": 61.30, "Wx": 66.80, "Wy": 11.40},
+
+    # --- U Enrijecido ---
+    "UE 75 x 40 x 15 x 2.00": {"familia": "U Enrijecido", "d": 75, "bf": 40, "tw": 2.00, "tf": 2.00, "A": 3.62, "Ix": 33.2, "Iy": 8.1, "Wx": 8.8, "Wy": 2.6},
+    "UE 75 x 40 x 15 x 2.65": {"familia": "U Enrijecido", "d": 75, "bf": 40, "tw": 2.65, "tf": 2.65, "A": 4.65, "Ix": 41.5, "Iy": 9.9, "Wx": 11.0, "Wy": 3.2},
+    
+    "UE 100 x 50 x 17 x 2.00": {"familia": "U Enrijecido", "d": 100, "bf": 50, "tw": 2.00, "tf": 2.00, "A": 4.56, "Ix": 71.0, "Iy": 15.6, "Wx": 14.2, "Wy": 4.2},
     "UE 100 x 50 x 17 x 2.25": {"familia": "U Enrijecido", "d": 100, "bf": 50, "tw": 2.25, "tf": 2.25, "A": 4.88, "Ix": 78.4, "Iy": 15.1, "Wx": 15.68, "Wy": 4.25},
+    "UE 100 x 50 x 17 x 2.65": {"familia": "U Enrijecido", "d": 100, "bf": 50, "tw": 2.65, "tf": 2.65, "A": 5.92, "Ix": 90.4, "Iy": 19.8, "Wx": 18.0, "Wy": 5.4},
+    "UE 100 x 50 x 17 x 3.00": {"familia": "U Enrijecido", "d": 100, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 6.64, "Ix": 100.1, "Iy": 21.8, "Wx": 20.0, "Wy": 6.0},
+    "UE 100 x 50 x 17 x 3.35": {"familia": "U Enrijecido (Chapa 10)", "d": 100, "bf": 50, "tw": 3.35, "tf": 3.35, "A": 7.34, "Ix": 109.1, "Iy": 23.6, "Wx": 21.8, "Wy": 6.5},
+
+    "UE 127 x 50 x 17 x 2.00": {"familia": "U Enrijecido", "d": 127, "bf": 50, "tw": 2.00, "tf": 2.00, "A": 5.10, "Ix": 125.0, "Iy": 16.4, "Wx": 19.7, "Wy": 4.3},
+    "UE 127 x 50 x 17 x 2.25": {"familia": "U Enrijecido", "d": 127, "bf": 50, "tw": 2.25, "tf": 2.25, "A": 5.71, "Ix": 139.0, "Iy": 18.2, "Wx": 21.9, "Wy": 4.8},
     "UE 127 x 50 x 17 x 2.65": {"familia": "U Enrijecido", "d": 127, "bf": 50, "tw": 2.65, "tf": 2.65, "A": 6.46, "Ix": 161.0, "Iy": 18.2, "Wx": 25.35, "Wy": 4.98},
+    "UE 127 x 50 x 17 x 3.00": {"familia": "U Enrijecido", "d": 127, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 7.45, "Ix": 179.0, "Iy": 23.1, "Wx": 28.2, "Wy": 6.1},
+    "UE 127 x 50 x 17 x 3.35": {"familia": "U Enrijecido (Chapa 10)", "d": 127, "bf": 50, "tw": 3.35, "tf": 3.35, "A": 8.24, "Ix": 195.0, "Iy": 25.1, "Wx": 30.7, "Wy": 6.7},
+
+    "UE 150 x 60 x 20 x 2.00": {"familia": "U Enrijecido", "d": 150, "bf": 60, "tw": 2.00, "tf": 2.00, "A": 6.16, "Ix": 215.0, "Iy": 30.0, "Wx": 28.6, "Wy": 6.6},
+    "UE 150 x 60 x 20 x 2.25": {"familia": "U Enrijecido", "d": 150, "bf": 60, "tw": 2.25, "tf": 2.25, "A": 6.90, "Ix": 239.0, "Iy": 33.3, "Wx": 31.8, "Wy": 7.4},
+    "UE 150 x 60 x 20 x 2.65": {"familia": "U Enrijecido", "d": 150, "bf": 60, "tw": 2.65, "tf": 2.65, "A": 8.04, "Ix": 277.0, "Iy": 38.3, "Wx": 36.9, "Wy": 8.5},
     "UE 150 x 60 x 20 x 3.00": {"familia": "U Enrijecido", "d": 150, "bf": 60, "tw": 3.00, "tf": 3.00, "A": 8.70, "Ix": 308.2, "Iy": 35.8, "Wx": 41.09, "Wy": 8.32},
+    "UE 150 x 60 x 20 x 3.35": {"familia": "U Enrijecido (Chapa 10)", "d": 150, "bf": 60, "tw": 3.35, "tf": 3.35, "A": 10.0, "Ix": 340.0, "Iy": 46.5, "Wx": 45.3, "Wy": 10.4},
+
+    "UE 200 x 75 x 20 x 2.65": {"familia": "U Enrijecido", "d": 200, "bf": 75, "tw": 2.65, "tf": 2.65, "A": 10.1, "Ix": 604.0, "Iy": 72.8, "Wx": 60.4, "Wy": 13.0},
+    "UE 200 x 75 x 20 x 3.00": {"familia": "U Enrijecido", "d": 200, "bf": 75, "tw": 3.00, "tf": 3.00, "A": 11.4, "Ix": 676.0, "Iy": 81.3, "Wx": 67.6, "Wy": 14.5},
+    "UE 200 x 75 x 20 x 3.35": {"familia": "U Enrijecido (Chapa 10)", "d": 200, "bf": 75, "tw": 3.35, "tf": 3.35, "A": 12.6, "Ix": 746.0, "Iy": 89.2, "Wx": 74.6, "Wy": 16.0},
 }
 
 CATALOGO_CANTONEIRAS = {
@@ -89,14 +148,10 @@ PROPRIEDADES_ACO = {
     "USI CIVIL 300": {"fy": 300, "fu": 410}
 }
 
-# =========================================================================================
-# MOTOR MATRICIAL 3D
-# =========================================================================================
-
 class MotorCalculo3D:
     def __init__(self):
-        self.E = 200e6  # kPa
-        self.G = 77e6   # kPa
+        self.E = 200e6  
+        self.G = 77e6   
         self.nos = []
         self.barras = []
         self.apoios = []
@@ -337,10 +392,6 @@ class MotorCalculo3D:
         except Exception as e:
             return {"sucesso": False, "erro": str(e)}
 
-# =========================================================================================
-# VERIFICADOR NBR 8800 E RELATÓRIOS
-# =========================================================================================
-
 class VerificadorNBR8800:
     def __init__(self, tipo_aco="ASTM A572 Gr 50"):
         self.aco = PROPRIEDADES_ACO.get(tipo_aco, PROPRIEDADES_ACO["ASTM A572 Gr 50"])
@@ -575,6 +626,145 @@ def desenhar_diagrama(res, tipo_diagrama):
     fig.update_layout(scene=dict(xaxis_title='X (m)', yaxis_title='Y (m)', zaxis_title='Z (m)', aspectmode='data'), margin=dict(l=0, r=0, b=0, t=0), height=600)
     return fig
 
+def gerar_relatorio_txt(dados, res_analise, resultados_comp, tudo_aprovado, tolerancia):
+    data_atual = datetime.now().strftime("%d/%m/%Y às %H:%M")
+    status_global = "APROVADA" if tudo_aprovado else "REPROVADA (Requer revisão de perfis)"
+    
+    aco = PROPRIEDADES_ACO[dados['tipo_aco']]
+    fy_mpa = aco['fy']
+    fy_kncm2 = fy_mpa / 10.0
+    gamma_a1 = 1.10
+    
+    relatorio = f"""=========================================================
+      MEMÓRIA DE CÁLCULO ESTRUTURAL DETALHADA
+=========================================================
+Data de Geração: {data_atual}
+Projeto: {dados.get('nome_projeto', 'Não informado')}
+Local: {dados.get('cidade', 'Não informada')}
+Status Global da Estrutura: {status_global}
+Tolerância de Aprovação Aplicada: +{tolerancia:.1f}%
+
+1. DADOS GEOMÉTRICOS E DE CONTORNO
+---------------------------------------------------------
+- Sistema Principal: {dados['sistema_principal']}
+"""
+    if dados['sistema_principal'] != "Mão Francesa / Suporte (Plano 2D)":
+        relatorio += f"- Tipo de Pilar: {dados['tipo_pilar']}\n"
+        relatorio += f"- Ângulo Giro dos Pilares: {dados.get('ang_pilares', 0.0):.1f}°\n"
+
+    relatorio += f"""- Vão Transversal (X): {dados['vao_x']:.2f} m
+- Altura (Z): {dados['altura_z']:.2f} m
+- Largura de Influência / Espaçamento: {dados['espacamento']:.2f} m
+"""
+    if dados['sistema_principal'] not in ["Mão Francesa / Suporte (Plano 2D)"]:
+        relatorio += f"- Comprimento Longitudinal (Y): {dados['comp_y']:.2f} m\n"
+        if dados['sistema_principal'] == "Mezanino / Passarela Metálica":
+            relatorio += f"- Espaçamento entre Vigotas Transversais: {dados['espacamento_vigota']:.2f} m\n"
+            relatorio += f"- Tipo de Piso: {dados['tipo_piso']}\n"
+
+    relatorio += f"""
+2. CARGAS DE PROJETO (ELU - NBR 6120 / NBR 8800)
+---------------------------------------------------------
+- Carga Permanente Total (G): {dados['g_total']:.2f} kN/m²
+- Sobrecarga Normativa de Uso (Q): {dados['q_sobre']:.2f} kN/m²
+>> CARGA DE PROJETO COMBINADA (ELU): {dados['q_elu']:.2f} kN/m²
+
+3. ESFORÇOS SOLICITANTES MÁXIMOS GLOBAIS
+---------------------------------------------------------
+- Esforço Normal Máximo (N_sd): {res_analise.get('n_max_kn', 0.0):.2f} kN
+- Esforço Cortante Máximo (V_sd): {res_analise.get('v_max_kn', 0.0):.2f} kN
+- Momento Fletor Máximo (M_sd): {res_analise.get('m_max_knm', 0.0):.2f} kNm
+- Deslocamento Máximo (Flecha ELS): {res_analise.get('desloc_max_mm', 0.0):.2f} mm
+
+4. TABELA DE ESFORÇOS EXTREMOS BIAXIAIS (LEGENDAS)
+---------------------------------------------------------
+"""
+    for grp, esf in res_analise.get('esforcos_grupos', {}).items():
+        if esf.get("n_pos", -1e9) == -1e9: continue
+        relatorio += f"[{grp.upper()}]\n"
+        relatorio += f"  Normal (N)   -> Máx (Tração): {esf.get('n_pos', 0.0):.2f} kN | Mín (Comp): {esf.get('n_neg', 0.0):.2f} kN\n"
+        relatorio += f"  Cortante (V) -> Máx: {esf.get('v_pos', 0.0):.2f} kN | Mín: {esf.get('v_neg', 0.0):.2f} kN\n"
+        relatorio += f"  Momento FORTE(Mx) -> Máx (+): {esf.get('my_pos', 0.0):.2f} kNm | Mín (-): {esf.get('my_neg', 0.0):.2f} kNm\n"
+        relatorio += f"  Momento FRACO(My) -> Máx (+): {esf.get('mz_pos', 0.0):.2f} kNm | Mín (-): {esf.get('mz_neg', 0.0):.2f} kNm\n"
+        relatorio += f"  Flecha Máx        -> {esf.get('d_max', 0.0):.2f} mm\n\n"
+
+    relatorio += f"""
+5. VERIFICAÇÃO DETALHADA BIAXIAL POR COMPONENTE (NBR 8800)
+---------------------------------------------------------
+Propriedades do Material: {dados['tipo_aco']} (fy = {fy_mpa} MPa = {fy_kncm2:.1f} kN/cm²)
+Coeficiente de Minoração (γ_a1) = {gamma_a1}
+
+"""
+    for v in resultados_comp:
+        perf = CATALOGO_COMPLETO[v['perfil']]
+        A = perf['A']
+        Wx = perf['Wx']
+        Wy = perf.get('Wy', 0.1)
+        d = perf['d'] / 10.0
+        tw = perf['tw'] / 10.0
+        Av = d * tw
+        status_comp = "APROVADO (COM TOLERÂNCIA)" if v['aprovado'] and v['taxa_maxima'] > 100.0 else ("APROVADO" if v['aprovado'] else "REPROVADO")
+
+        relatorio += f"[{v['componente'].upper()}]\n  Perfil Selecionado: {v['perfil']} ({v['familia']})\n"
+        relatorio += f"  A. ESFORÇOS ATUANTES MÁXIMOS EM MÓDULO ABSOLUTO (Sd)\n"
+        relatorio += f"     N_Sd (Tração) = {v.get('N_trac_sd', 0.0):.2f} kN | N_Sd (Compressão) = {v.get('N_comp_sd', 0.0):.2f} kN\n"
+        relatorio += f"     V_Sd = {v.get('V_sd', 0.0):.2f} kN\n"
+        relatorio += f"     M_Sd,x (Eixo Forte) = {v.get('My_sd', 0.0):.2f} kNm | M_Sd,y (Eixo Fraco) = {v.get('Mz_sd', 0.0):.2f} kNm\n\n"
+        relatorio += f"  B. PROPRIEDADES GEOMÉTRICAS DA SEÇÃO\n"
+        relatorio += f"     Área Bruta (A) = {A:.2f} cm² | Área de Cisalhamento Efetiva (Av) = {Av:.2f} cm²\n"
+        relatorio += f"     Mód. Resistente: Wx (Forte) = {Wx:.2f} cm³ | Wy (Fraco) = {Wy:.2f} cm³\n"
+        relatorio += f"     Raios de Giração: rx = {v.get('rx', 0.0):.2f} cm | ry = {v.get('ry', 0.0):.2f} cm\n\n"
+        relatorio += f"  C. ANÁLISE DE FLAMBAGEM GLOBAL E ESBELTEZ\n"
+        relatorio += f"     Índice de Esbeltez (λ) = {v.get('esbeltez_max', 0.0):.1f} (Limite: 200)\n"
+        relatorio += f"     Fator de Redução de Compressão (χ) = {v.get('chi', 1.0):.3f}\n\n"
+        relatorio += f"  D. VERIFICAÇÕES DE RESISTÊNCIA E FLECHA\n"
+        relatorio += f"     Resistência Tracionada (N_Rd,t = {v.get('N_rd_trac', 0.0):.2f} kN) -> Taxa: {v.get('ratio_N_trac', 0.0):.1f}%\n"
+        relatorio += f"     Resistência Comprimida (N_Rd,c = {v.get('N_rd_comp', 0.0):.2f} kN) -> Taxa: {v.get('ratio_N_comp', 0.0):.1f}%\n"
+        relatorio += f"     Cisalhamento (V_Rd = {v.get('V_rd', 0.0):.2f} kN): V_Sd/V_Rd = {v.get('ratio_V', 0.0):.1f}%\n"
+        relatorio += f"     Flexão Forte (M_Rd,x = {v.get('M_rd_x', 0.0):.2f} kNm): M_Sd,x/M_Rd,x = {v.get('ratio_Mx', 0.0):.1f}%\n"
+        relatorio += f"     Flexão Fraca (M_Rd,y = {v.get('M_rd_y', 0.0):.2f} kNm): M_Sd,y/M_Rd,y = {v.get('ratio_My', 0.0):.1f}%\n"
+        relatorio += f"     Interação Flexo-Compressão Biaxial: Taxa Integrada = {v.get('taxa_interacao', 0.0):.1f}%\n"
+        relatorio += f"     Flecha (L_vão = {v.get('L_teorico_m', 0.0):.2f} m | δ_lim = {v.get('delta_lim_mm', 0.0):.1f} mm): {v.get('D_sd', 0.0):.2f} / {v.get('delta_lim_mm', 1.0):.1f} = {v.get('ratio_delta', 0.0):.1f}%\n\n"
+        relatorio += f"  >> STATUS DA PEÇA: {status_comp} (Taxa Máxima: {v.get('taxa_maxima', 0.0):.1f}%)\n.........................................................\n\n"
+    return relatorio
+
+def gerar_relatorio_pdf(texto_memoria, res_analise=None, incluir_graficos=False):
+    if FPDF is None: return None
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Courier", size=9) 
+    for linha in texto_memoria.split('\n'):
+        pdf.multi_cell(0, 5, txt=linha.encode('latin-1', 'replace').decode('latin-1'))
+        
+    if res_analise and incluir_graficos:
+        try:
+            pdf.add_page()
+            pdf.set_font("Courier", 'B', 12)
+            pdf.cell(0, 10, "6. ANEXO - DIAGRAMAS 3D/2D", ln=True)
+            pdf.set_font("Courier", size=9)
+            
+            diagramas = ["Deslocamentos (Deformada)", "Momento Fletor (My)", "Reações de Apoio"]
+            
+            for diag in diagramas:
+                fig = desenhar_diagrama(res_analise, diag)
+                fig.update_layout(paper_bgcolor='white', plot_bgcolor='white')
+                
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp:
+                    fig.write_image(tmp.name, width=800, height=600)
+                    pdf.cell(0, 10, f"-> {diag}:", ln=True)
+                    pdf.image(tmp.name, x=10, w=190)
+                    pdf.ln(5)
+                    tmp_path = tmp.name
+                
+                if os.path.exists(tmp_path):
+                    os.unlink(tmp_path)
+                    
+        except Exception as e:
+            pdf.multi_cell(0, 5, txt=f"\n[Aviso: Não foi possível gerar os diagramas no PDF. Servidor sem suporte ao 'kaleido' ou timeout. Detalhe: {e}]")
+
+    out = pdf.output(dest='S')
+    return out.encode('latin-1') if isinstance(out, str) else bytes(out)
+
 def obter_propriedades(nome_perfil):
     p = CATALOGO_COMPLETO[nome_perfil]
     return {"A": p["A"] * 1e-4, "Iy": p["Ix"] * 1e-8, "Iz": p["Iy"] * 1e-8, "J": (p["Iy"] * 1e-8) / 2.0}
@@ -592,6 +782,7 @@ def main():
     st.sidebar.markdown("---")
 
     st.sidebar.title("Configurações Gerais")
+    
     sistema_principal = st.sidebar.selectbox("Sistema Principal", ["Pórtico Alma Cheia", "Tesoura Plana (Treliçada)", "Arco", "Mezanino / Passarela Metálica", "Mão Francesa / Suporte (Plano 2D)"])
     
     if sistema_principal != "Mão Francesa / Suporte (Plano 2D)":
@@ -642,9 +833,9 @@ def main():
         mapa_perfis = {"Pilares Metálicos": perf_pil, "Vigas Principais (Longitudinais)": perf_v_prin, "Diagonais": perf_diag}
     else:
         perf_pil = st.sidebar.selectbox("Pilares", lista_perfis, index=lista_perfis.index("W 250 x 25.3") if "W 250 x 25.3" in lista_perfis else 0) if tipo_pilar == "Pilar Metálico" else None
-        perf_terca = st.sidebar.selectbox("Terças de Cobertura", lista_perfis, index=lista_perfis.index("U 100 x 40 x 2.25") if "U 100 x 40 x 2.25" in lista_perfis else 0)
-        perf_bz_sup = st.sidebar.selectbox("Banzo Superior", lista_perfis, index=lista_perfis.index("U 150 x 50 x 3.00") if "U 150 x 50 x 3.00" in lista_perfis else 0)
-        perf_bz_inf = st.sidebar.selectbox("Banzo Inferior", lista_perfis, index=lista_perfis.index("U 150 x 50 x 3.00") if "U 150 x 50 x 3.00" in lista_perfis else 0)
+        perf_terca = st.sidebar.selectbox("Terças de Cobertura", lista_perfis, index=lista_perfis.index("U 100 x 50 x 2.25") if "U 100 x 50 x 2.25" in lista_perfis else 0)
+        perf_bz_sup = st.sidebar.selectbox("Banzo Superior", lista_perfis, index=lista_perfis.index("U 100 x 50 x 3.00") if "U 100 x 50 x 3.00" in lista_perfis else 0)
+        perf_bz_inf = st.sidebar.selectbox("Banzo Inferior", lista_perfis, index=lista_perfis.index("U 100 x 50 x 3.00") if "U 100 x 50 x 3.00" in lista_perfis else 0)
         perf_diag = st.sidebar.selectbox("Diagonais", lista_perfis, index=lista_perfis.index('2x L 2" x 3/16" (Dupla)') if '2x L 2" x 3/16" (Dupla)' in lista_perfis else 0)
         perf_mont = st.sidebar.selectbox("Montantes", lista_perfis, index=lista_perfis.index("2x L 2.1/2\" x 1/4\" (Dupla)") if "2x L 2.1/2\" x 1/4\" (Dupla)" in lista_perfis else 0)
         mapa_perfis = {"Pilares Metálicos": perf_pil, "Terças de Cobertura": perf_terca, "Banzo Superior": perf_bz_sup, "Banzo Inferior": perf_bz_inf, "Diagonais": perf_diag, "Montantes": perf_mont}
@@ -888,6 +1079,26 @@ def main():
             elif len(resultados_comp) > 0: st.error("### ❌ HÁ PERFIS REPROVADOS!")
             
             if len(resultados_comp) > 0:
+                st.markdown("---")
+                dados_r = {
+                    "nome_projeto": nome_projeto,
+                    "cidade": cidade,
+                    "sistema_principal": sistema_principal, "tipo_pilar": tipo_pilar, 
+                    "distribuicao_pilares": distribuicao_pilares, "vao_x": vao_x, "comp_y": comp_y, 
+                    "altura_z": altura_z, "espacamento": espacamento, "espacamento_vigota": espacamento_vigota,
+                    "g_total": g_total, "q_sobre": q_sobre, "q_elu": q_elu, "tipo_aco": tipo_aco, 
+                    "q_vento_liquido": q_vento_liquido, "tipo_piso": tipo_piso if sistema_principal == "Mezanino / Passarela Metálica" else "N/A",
+                    "ang_pilares": ang_pilares
+                }
+                texto_memoria = gerar_relatorio_txt(dados_r, res, resultados_comp, tudo_aprovado, tolerancia_aceitacao)
+                
+                col_d1, col_d2, col_d3 = st.columns([1.5, 1.5, 2])
+                with col_d1: st.download_button("📄 Baixar TXT", data=texto_memoria, file_name="Calculo.txt")
+                with col_d2:
+                    if FPDF is not None:
+                        incluir_img = col_d3.checkbox("Anexar Imagens 3D no PDF (Pode causar erro/lentidão na nuvem)")
+                        st.download_button("📥 Baixar PDF", data=gerar_relatorio_pdf(texto_memoria, res, incluir_img), file_name="Calculo_Detalhado.pdf", mime="application/pdf", type="primary")
+
                 st.markdown("---")
                 for v in resultados_comp:
                     st.write(f"#### 🔹 {v['componente']} — `{v['perfil']}`")
