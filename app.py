@@ -32,95 +32,23 @@ CATALOGO_LAMINADOS = {
 
 CATALOGO_CHAPA_DOBRADA = {
     "U 50 x 25 x 2.00": {"familia": "Chapa Dobrada U", "d": 50, "bf": 25, "tw": 2.00, "tf": 2.00, "A": 1.75, "Ix": 6.66, "Iy": 1.07, "Wx": 2.60, "Wy": 0.60},
-    "U 50 x 25 x 2.25": {"familia": "Chapa Dobrada U", "d": 50, "bf": 25, "tw": 2.25, "tf": 2.25, "A": 1.95, "Ix": 7.40, "Iy": 1.19, "Wx": 2.96, "Wy": 0.66},
     "U 50 x 25 x 2.65": {"familia": "Chapa Dobrada U", "d": 50, "bf": 25, "tw": 2.65, "tf": 2.65, "A": 2.27, "Ix": 8.55, "Iy": 1.38, "Wx": 3.42, "Wy": 0.76},
-    "U 50 x 25 x 3.00": {"familia": "Chapa Dobrada U", "d": 50, "bf": 25, "tw": 3.00, "tf": 3.00, "A": 2.54, "Ix": 9.50, "Iy": 1.52, "Wx": 3.80, "Wy": 0.84},
-    "U 50 x 25 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 50, "bf": 25, "tw": 3.35, "tf": 3.35, "A": 2.81, "Ix": 10.40, "Iy": 1.65, "Wx": 4.16, "Wy": 0.91},
     "U 75 x 38 x 2.00": {"familia": "Chapa Dobrada U", "d": 75, "bf": 38, "tw": 2.00, "tf": 2.00, "A": 2.80, "Ix": 25.10, "Iy": 4.55, "Wx": 6.60, "Wy": 1.58},
-    "U 75 x 38 x 2.25": {"familia": "Chapa Dobrada U", "d": 75, "bf": 38, "tw": 2.25, "tf": 2.25, "A": 3.13, "Ix": 27.90, "Iy": 5.05, "Wx": 7.44, "Wy": 1.75},
-    "U 75 x 38 x 2.65": {"familia": "Chapa Dobrada U", "d": 75, "bf": 38, "tw": 2.65, "tf": 2.65, "A": 3.65, "Ix": 32.40, "Iy": 5.85, "Wx": 8.64, "Wy": 2.02},
-    "U 75 x 38 x 3.00": {"familia": "Chapa Dobrada U", "d": 75, "bf": 38, "tw": 3.00, "tf": 3.00, "A": 4.09, "Ix": 36.10, "Iy": 6.50, "Wx": 9.62, "Wy": 2.24},
-    "U 75 x 38 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 75, "bf": 38, "tw": 3.35, "tf": 3.35, "A": 4.52, "Ix": 39.70, "Iy": 7.10, "Wx": 10.58, "Wy": 2.45},
-    "U 75 x 40 x 2.00": {"familia": "Chapa Dobrada U", "d": 75, "bf": 40, "tw": 2.00, "tf": 2.00, "A": 2.80, "Ix": 25.10, "Iy": 4.55, "Wx": 6.60, "Wy": 1.58},
-    "U 75 x 40 x 2.65": {"familia": "Chapa Dobrada U", "d": 75, "bf": 40, "tw": 2.65, "tf": 2.65, "A": 3.75, "Ix": 32.20, "Iy": 5.80, "Wx": 8.50, "Wy": 2.05},
-    "U 75 x 40 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 75, "bf": 40, "tw": 3.35, "tf": 3.35, "A": 4.60, "Ix": 38.50, "Iy": 6.90, "Wx": 10.20, "Wy": 2.50},
     "U 100 x 40 x 2.25": {"familia": "Chapa Dobrada U", "d": 100, "bf": 40, "tw": 2.25, "tf": 2.25, "A": 3.89, "Ix": 57.67, "Iy": 5.89, "Wx": 11.50, "Wy": 1.96},
-    "U 100 x 50 x 2.00": {"familia": "Chapa Dobrada U", "d": 100, "bf": 50, "tw": 2.00, "tf": 2.00, "A": 3.65, "Ix": 58.15, "Iy": 9.24, "Wx": 11.60, "Wy": 2.52},
-    "U 100 x 50 x 2.25": {"familia": "Chapa Dobrada U", "d": 100, "bf": 50, "tw": 2.25, "tf": 2.25, "A": 4.35, "Ix": 68.55, "Iy": 10.94, "Wx": 13.70, "Wy": 3.00},
-    "U 100 x 50 x 2.65": {"familia": "Chapa Dobrada U", "d": 100, "bf": 50, "tw": 2.65, "tf": 2.65, "A": 5.04, "Ix": 78.60, "Iy": 12.59, "Wx": 15.70, "Wy": 3.48},
     "U 100 x 50 x 3.00": {"familia": "Chapa Dobrada U", "d": 100, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 5.71, "Ix": 88.29, "Iy": 14.20, "Wx": 17.60, "Wy": 3.94},
-    "U 100 x 50 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 100, "bf": 50, "tw": 3.35, "tf": 3.35, "A": 6.30, "Ix": 96.10, "Iy": 15.60, "Wx": 19.20, "Wy": 4.40},
-    "U 127 x 50 x 2.00": {"familia": "Chapa Dobrada U", "d": 127, "bf": 50, "tw": 2.00, "tf": 2.00, "A": 4.38, "Ix": 106.0, "Iy": 10.40, "Wx": 16.70, "Wy": 2.80},
-    "U 127 x 50 x 2.25": {"familia": "Chapa Dobrada U", "d": 127, "bf": 50, "tw": 2.25, "tf": 2.25, "A": 4.90, "Ix": 118.0, "Iy": 11.60, "Wx": 18.60, "Wy": 3.10},
-    "U 127 x 50 x 2.65": {"familia": "Chapa Dobrada U", "d": 127, "bf": 50, "tw": 2.65, "tf": 2.65, "A": 5.75, "Ix": 138.0, "Iy": 13.50, "Wx": 21.70, "Wy": 3.60},
     "U 127 x 50 x 3.00": {"familia": "Chapa Dobrada U", "d": 127, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 6.53, "Ix": 154.8, "Iy": 15.32, "Wx": 24.30, "Wy": 4.08},
-    "U 127 x 50 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 127, "bf": 50, "tw": 3.35, "tf": 3.35, "A": 7.20, "Ix": 171.0, "Iy": 16.70, "Wx": 26.90, "Wy": 4.50},
-    "U 150 x 50 x 2.00": {"familia": "Chapa Dobrada U", "d": 150, "bf": 50, "tw": 2.00, "tf": 2.00, "A": 4.84, "Ix": 160.0, "Iy": 10.70, "Wx": 21.30, "Wy": 2.80},
-    "U 150 x 50 x 2.65": {"familia": "Chapa Dobrada U", "d": 150, "bf": 50, "tw": 2.65, "tf": 2.65, "A": 6.36, "Ix": 208.0, "Iy": 13.80, "Wx": 27.70, "Wy": 3.70},
     "U 150 x 50 x 3.00": {"familia": "Chapa Dobrada U", "d": 150, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 7.23, "Ix": 230.1, "Iy": 16.08, "Wx": 30.60, "Wy": 4.16},
     "U 150 x 50 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 150, "bf": 50, "tw": 3.35, "tf": 3.35, "A": 7.97, "Ix": 257.0, "Iy": 17.10, "Wx": 34.30, "Wy": 4.60},
-    "U 200 x 75 x 2.65": {"familia": "Chapa Dobrada U", "d": 200, "bf": 75, "tw": 2.65, "tf": 2.65, "A": 9.01, "Ix": 538.0, "Iy": 49.30, "Wx": 53.80, "Wy": 9.20},
-    "U 200 x 75 x 3.00": {"familia": "Chapa Dobrada U", "d": 200, "bf": 75, "tw": 3.00, "tf": 3.00, "A": 10.10, "Ix": 604.0, "Iy": 55.40, "Wx": 60.40, "Wy": 10.30},
     "U 200 x 75 x 3.35": {"familia": "Chapa Dobrada U (Chapa 10)", "d": 200, "bf": 75, "tw": 3.35, "tf": 3.35, "A": 11.30, "Ix": 668.0, "Iy": 61.30, "Wx": 66.80, "Wy": 11.40},
-
-    # --- U Enrijecido ---
-    "UE 75 x 40 x 15 x 2.00": {"familia": "U Enrijecido", "d": 75, "bf": 40, "tw": 2.00, "tf": 2.00, "A": 3.62, "Ix": 33.2, "Iy": 8.1, "Wx": 8.8, "Wy": 2.6},
-    "UE 75 x 40 x 15 x 2.65": {"familia": "U Enrijecido", "d": 75, "bf": 40, "tw": 2.65, "tf": 2.65, "A": 4.65, "Ix": 41.5, "Iy": 9.9, "Wx": 11.0, "Wy": 3.2},
-    "UE 100 x 50 x 17 x 2.00": {"familia": "U Enrijecido", "d": 100, "bf": 50, "tw": 2.00, "tf": 2.00, "A": 4.56, "Ix": 71.0, "Iy": 15.6, "Wx": 14.2, "Wy": 4.2},
     "UE 100 x 50 x 17 x 2.25": {"familia": "U Enrijecido", "d": 100, "bf": 50, "tw": 2.25, "tf": 2.25, "A": 4.88, "Ix": 78.4, "Iy": 15.1, "Wx": 15.68, "Wy": 4.25},
-    "UE 100 x 50 x 17 x 2.65": {"familia": "U Enrijecido", "d": 100, "bf": 50, "tw": 2.65, "tf": 2.65, "A": 5.92, "Ix": 90.4, "Iy": 19.8, "Wx": 18.0, "Wy": 5.4},
-    "UE 100 x 50 x 17 x 3.00": {"familia": "U Enrijecido", "d": 100, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 6.64, "Ix": 100.1, "Iy": 21.8, "Wx": 20.0, "Wy": 6.0},
-    "UE 100 x 50 x 17 x 3.35": {"familia": "U Enrijecido (Chapa 10)", "d": 100, "bf": 50, "tw": 3.35, "tf": 3.35, "A": 7.34, "Ix": 109.1, "Iy": 23.6, "Wx": 21.8, "Wy": 6.5},
-    "UE 127 x 50 x 17 x 2.00": {"familia": "U Enrijecido", "d": 127, "bf": 50, "tw": 2.00, "tf": 2.00, "A": 5.10, "Ix": 125.0, "Iy": 16.4, "Wx": 19.7, "Wy": 4.3},
-    "UE 127 x 50 x 17 x 2.25": {"familia": "U Enrijecido", "d": 127, "bf": 50, "tw": 2.25, "tf": 2.25, "A": 5.71, "Ix": 139.0, "Iy": 18.2, "Wx": 21.9, "Wy": 4.8},
-    "UE 127 x 50 x 17 x 2.65": {"familia": "U Enrijecido", "d": 127, "bf": 50, "tw": 2.65, "tf": 2.65, "A": 6.46, "Ix": 161.0, "Iy": 18.2, "Wx": 25.35, "Wy": 4.98},
-    "UE 127 x 50 x 17 x 3.00": {"familia": "U Enrijecido", "d": 127, "bf": 50, "tw": 3.00, "tf": 3.00, "A": 7.45, "Ix": 179.0, "Iy": 23.1, "Wx": 28.2, "Wy": 6.1},
-    "UE 127 x 50 x 17 x 3.35": {"familia": "U Enrijecido (Chapa 10)", "d": 127, "bf": 50, "tw": 3.35, "tf": 3.35, "A": 8.24, "Ix": 195.0, "Iy": 25.1, "Wx": 30.7, "Wy": 6.7},
-    "UE 150 x 60 x 20 x 2.00": {"familia": "U Enrijecido", "d": 150, "bf": 60, "tw": 2.00, "tf": 2.00, "A": 6.16, "Ix": 215.0, "Iy": 30.0, "Wx": 28.6, "Wy": 6.6},
-    "UE 150 x 60 x 20 x 2.25": {"familia": "U Enrijecido", "d": 150, "bf": 60, "tw": 2.25, "tf": 2.25, "A": 6.90, "Ix": 239.0, "Iy": 33.3, "Wx": 31.8, "Wy": 7.4},
-    "UE 150 x 60 x 20 x 2.65": {"familia": "U Enrijecido", "d": 150, "bf": 60, "tw": 2.65, "tf": 2.65, "A": 8.04, "Ix": 277.0, "Iy": 38.3, "Wx": 36.9, "Wy": 8.5},
     "UE 150 x 60 x 20 x 3.00": {"familia": "U Enrijecido", "d": 150, "bf": 60, "tw": 3.00, "tf": 3.00, "A": 8.70, "Ix": 308.2, "Iy": 35.8, "Wx": 41.09, "Wy": 8.32},
-    "UE 150 x 60 x 20 x 3.35": {"familia": "U Enrijecido (Chapa 10)", "d": 150, "bf": 60, "tw": 3.35, "tf": 3.35, "A": 10.0, "Ix": 340.0, "Iy": 46.5, "Wx": 45.3, "Wy": 10.4},
-    "UE 200 x 75 x 20 x 2.65": {"familia": "U Enrijecido", "d": 200, "bf": 75, "tw": 2.65, "tf": 2.65, "A": 10.1, "Ix": 604.0, "Iy": 72.8, "Wx": 60.4, "Wy": 13.0},
-    "UE 200 x 75 x 20 x 3.00": {"familia": "U Enrijecido", "d": 200, "bf": 75, "tw": 3.00, "tf": 3.00, "A": 11.4, "Ix": 676.0, "Iy": 81.3, "Wx": 67.6, "Wy": 14.5},
-    "UE 200 x 75 x 20 x 3.35": {"familia": "U Enrijecido (Chapa 10)", "d": 200, "bf": 75, "tw": 3.35, "tf": 3.35, "A": 12.6, "Ix": 746.0, "Iy": 89.2, "Wx": 74.6, "Wy": 16.0},
 }
 
 CATALOGO_CANTONEIRAS = {
-    "L 1\" x 1/8\"": {"familia": "Cantoneira L", "d": 25.4, "bf": 25.4, "tw": 3.17, "tf": 3.17, "A": 1.51, "Ix": 0.8, "Iy": 0.8, "Wx": 0.4, "Wy": 0.4},
-    "2x L 1\" x 1/8\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 25.4, "bf": 60.8, "tw": 3.17, "tf": 3.17, "A": 3.02, "Ix": 1.6, "Iy": 3.2, "Wx": 0.8, "Wy": 1.4},
-    "L 1.1/4\" x 1/8\"": {"familia": "Cantoneira L", "d": 31.7, "bf": 31.7, "tw": 3.17, "tf": 3.17, "A": 1.92, "Ix": 1.8, "Iy": 1.8, "Wx": 0.8, "Wy": 0.8},
-    "2x L 1.1/4\" x 1/8\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 31.7, "bf": 73.4, "tw": 3.17, "tf": 3.17, "A": 3.84, "Ix": 3.6, "Iy": 7.2, "Wx": 1.6, "Wy": 2.7},
     "L 1.1/2\" x 1/8\"": {"familia": "Cantoneira L", "d": 38.1, "bf": 38.1, "tw": 3.17, "tf": 3.17, "A": 2.32, "Ix": 3.2, "Iy": 3.2, "Wx": 1.1, "Wy": 1.1},
-    "2x L 1.1/2\" x 1/8\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 38.1, "bf": 86.2, "tw": 3.17, "tf": 3.17, "A": 4.64, "Ix": 6.4, "Iy": 12.8, "Wx": 2.2, "Wy": 3.7},
-    "L 1.1/2\" x 3/16\"": {"familia": "Cantoneira L", "d": 38.1, "bf": 38.1, "tw": 4.76, "tf": 4.76, "A": 3.40, "Ix": 4.6, "Iy": 4.6, "Wx": 1.7, "Wy": 1.7},
-    "2x L 1.1/2\" x 3/16\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 38.1, "bf": 86.2, "tw": 4.76, "tf": 4.76, "A": 6.80, "Ix": 9.2, "Iy": 18.4, "Wx": 3.4, "Wy": 5.8},
-    "L 2\" x 1/8\"": {"familia": "Cantoneira L", "d": 50.8, "bf": 50.8, "tw": 3.17, "tf": 3.17, "A": 3.12, "Ix": 7.7, "Iy": 7.7, "Wx": 2.1, "Wy": 2.1},
-    "2x L 2\" x 1/8\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 50.8, "bf": 111.6, "tw": 3.17, "tf": 3.17, "A": 6.24, "Ix": 15.4, "Iy": 30.8, "Wx": 4.2, "Wy": 7.1},
-    "L 2\" x 3/16\"": {"familia": "Cantoneira L", "d": 50.8, "bf": 50.8, "tw": 4.76, "tf": 4.76, "A": 4.58, "Ix": 10.9, "Iy": 10.9, "Wx": 3.0, "Wy": 3.0},
     "2x L 2\" x 3/16\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 50.8, "bf": 111.6, "tw": 4.76, "tf": 4.76, "A": 9.16, "Ix": 21.8, "Iy": 44.2, "Wx": 6.0, "Wy": 10.2},
-    "L 2\" x 1/4\"": {"familia": "Cantoneira L", "d": 50.8, "bf": 50.8, "tw": 6.35, "tf": 6.35, "A": 6.06, "Ix": 14.1, "Iy": 14.1, "Wx": 4.0, "Wy": 4.0},
-    "2x L 2\" x 1/4\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 50.8, "bf": 111.6, "tw": 6.35, "tf": 6.35, "A": 12.12, "Ix": 28.2, "Iy": 56.4, "Wx": 8.0, "Wy": 13.6},
-    "L 2.1/2\" x 3/16\"": {"familia": "Cantoneira L", "d": 63.5, "bf": 63.5, "tw": 4.76, "tf": 4.76, "A": 5.80, "Ix": 22.4, "Iy": 22.4, "Wx": 4.8, "Wy": 4.8},
-    "2x L 2.1/2\" x 3/16\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 63.5, "bf": 137.0, "tw": 4.76, "tf": 4.76, "A": 11.60, "Ix": 44.8, "Iy": 89.6, "Wx": 9.6, "Wy": 16.3},
-    "L 2.1/2\" x 1/4\"": {"familia": "Cantoneira L", "d": 63.5, "bf": 63.5, "tw": 6.35, "tf": 6.35, "A": 7.67, "Ix": 28.8, "Iy": 28.8, "Wx": 6.3, "Wy": 6.3},
     "2x L 2.1/2\" x 1/4\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 63.5, "bf": 137.0, "tw": 6.35, "tf": 6.35, "A": 14.80, "Ix": 54.8, "Iy": 112.0, "Wx": 12.1, "Wy": 21.5},
-    "L 3\" x 3/16\"": {"familia": "Cantoneira L", "d": 76.2, "bf": 76.2, "tw": 4.76, "tf": 4.76, "A": 7.03, "Ix": 39.5, "Iy": 39.5, "Wx": 7.1, "Wy": 7.1},
-    "2x L 3\" x 3/16\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 76.2, "bf": 162.4, "tw": 4.76, "tf": 4.76, "A": 14.06, "Ix": 79.0, "Iy": 158.0, "Wx": 14.2, "Wy": 24.1},
-    "L 3\" x 1/4\"": {"familia": "Cantoneira L", "d": 76.2, "bf": 76.2, "tw": 6.35, "tf": 6.35, "A": 9.29, "Ix": 51.1, "Iy": 51.1, "Wx": 9.3, "Wy": 9.3},
-    "2x L 3\" x 1/4\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 76.2, "bf": 162.4, "tw": 6.35, "tf": 6.35, "A": 18.58, "Ix": 102.2, "Iy": 204.4, "Wx": 18.6, "Wy": 31.6},
-    "L 3\" x 5/16\"": {"familia": "Cantoneira L", "d": 76.2, "bf": 76.2, "tw": 7.94, "tf": 7.94, "A": 11.50, "Ix": 62.4, "Iy": 62.4, "Wx": 11.5, "Wy": 11.5},
-    "2x L 3\" x 5/16\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 76.2, "bf": 162.4, "tw": 7.94, "tf": 7.94, "A": 23.00, "Ix": 124.8, "Iy": 249.6, "Wx": 23.0, "Wy": 39.1},
-    "L 3\" x 3/8\"": {"familia": "Cantoneira L", "d": 76.2, "bf": 76.2, "tw": 9.52, "tf": 9.52, "A": 13.60, "Ix": 72.8, "Iy": 72.8, "Wx": 13.6, "Wy": 13.6},
-    "2x L 3\" x 3/8\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 76.2, "bf": 162.4, "tw": 9.52, "tf": 9.52, "A": 27.20, "Ix": 145.6, "Iy": 291.2, "Wx": 27.2, "Wy": 46.2},
-    "L 4\" x 1/4\"": {"familia": "Cantoneira L", "d": 101.6, "bf": 101.6, "tw": 6.35, "tf": 6.35, "A": 12.50, "Ix": 124.0, "Iy": 124.0, "Wx": 17.0, "Wy": 17.0},
-    "2x L 4\" x 1/4\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 101.6, "bf": 213.2, "tw": 6.35, "tf": 6.35, "A": 25.00, "Ix": 248.0, "Iy": 496.0, "Wx": 34.0, "Wy": 57.8},
-    "L 4\" x 5/16\"": {"familia": "Cantoneira L", "d": 101.6, "bf": 101.6, "tw": 7.94, "tf": 7.94, "A": 15.50, "Ix": 153.0, "Iy": 153.0, "Wx": 21.1, "Wy": 21.1},
     "2x L 4\" x 5/16\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 101.6, "bf": 213.2, "tw": 7.94, "tf": 7.94, "A": 31.00, "Ix": 306.0, "Iy": 612.0, "Wx": 42.2, "Wy": 71.7},
-    "L 4\" x 3/8\"": {"familia": "Cantoneira L", "d": 101.6, "bf": 101.6, "tw": 9.52, "tf": 9.52, "A": 18.50, "Ix": 179.0, "Iy": 179.0, "Wx": 24.9, "Wy": 24.9},
-    "2x L 4\" x 3/8\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 101.6, "bf": 213.2, "tw": 9.52, "tf": 9.52, "A": 37.00, "Ix": 358.0, "Iy": 716.0, "Wx": 49.8, "Wy": 84.6},
-    "L 4\" x 1/2\"": {"familia": "Cantoneira L", "d": 101.6, "bf": 101.6, "tw": 12.70, "tf": 12.70, "A": 24.20, "Ix": 230.0, "Iy": 230.0, "Wx": 32.4, "Wy": 32.4},
-    "2x L 4\" x 1/2\" (Dupla)": {"familia": "Cantoneira Dupla", "d": 101.6, "bf": 213.2, "tw": 12.70, "tf": 12.70, "A": 48.40, "Ix": 460.0, "Iy": 920.0, "Wx": 64.8, "Wy": 110.1},
 }
 
 CATALOGO_COMPLETO = {**CATALOGO_LAMINADOS, **CATALOGO_CHAPA_DOBRADA, **CATALOGO_CANTONEIRAS}
@@ -380,7 +308,7 @@ class MotorCalculo3D:
             return {"sucesso": False, "erro": str(e)}
 
 # =========================================================================================
-# VERIFICADOR NBR 8800
+# VERIFICADOR NBR 8800 E FUNÇÕES VISUAIS
 # =========================================================================================
 
 class VerificadorNBR8800:
@@ -407,8 +335,7 @@ class VerificadorNBR8800:
         Mz_sd_e = abs(Mz_sd) * fator_esforso  
 
         L_cm = vao_m * 100.0
-        Kx = 1.0  
-        Ky = 1.0
+        Kx, Ky = 1.0, 1.0
         
         rx = np.sqrt(Ix / A) if A > 0 else 1e-5
         ry = np.sqrt(Iy / A) if A > 0 else 1e-5
@@ -418,15 +345,11 @@ class VerificadorNBR8800:
         esbeltez_max = max(esbeltez_x, esbeltez_y)
         
         Q = 1.0 
-        
         Ne = (np.pi**2 * self.E_cm * A) / (esbeltez_max**2) if esbeltez_max > 0 else 1e9
-        
         lambda_0 = np.sqrt((Q * A * fy) / Ne) if Ne > 0 else 999.0
         
-        if lambda_0 <= 1.5:
-            chi = 0.658 ** (lambda_0**2)
-        else:
-            chi = 0.877 / (lambda_0**2)
+        if lambda_0 <= 1.5: chi = 0.658 ** (lambda_0**2)
+        else: chi = 0.877 / (lambda_0**2)
             
         M_rd_x = (Wx * fy) / (100.0 * self.gamma_a1)  
         M_rd_y = (Wy * fy) / (100.0 * self.gamma_a1)
@@ -444,10 +367,8 @@ class VerificadorNBR8800:
         ratio_Mx = My_sd_e / M_rd_x if M_rd_x > 0 else 0
         ratio_My = Mz_sd_e / M_rd_y if M_rd_y > 0 else 0
 
-        if ratio_N_max >= 0.2:
-            taxa_interacao = ratio_N_max + (8.0/9.0) * (ratio_Mx + ratio_My)
-        else:
-            taxa_interacao = (ratio_N_max / 2.0) + (ratio_Mx + ratio_My)
+        if ratio_N_max >= 0.2: taxa_interacao = ratio_N_max + (8.0/9.0) * (ratio_Mx + ratio_My)
+        else: taxa_interacao = (ratio_N_max / 2.0) + (ratio_Mx + ratio_My)
 
         ratio_V = V_sd_e / V_rd if V_rd > 0 else 0
 
@@ -457,75 +378,88 @@ class VerificadorNBR8800:
         taxa_maxima = max(taxa_interacao, ratio_V, ratio_delta)
 
         return {
-            "perfil": nome_perfil,
-            "familia": perfil["familia"],
-            "aprovado": taxa_maxima <= 1.0,
-            "taxa_maxima": taxa_maxima * 100.0,
-            "taxa_interacao": taxa_interacao * 100.0,
-            "ratio_N": ratio_N_max * 100.0,
-            "ratio_N_trac": ratio_N_trac * 100.0,
-            "ratio_N_comp": ratio_N_comp * 100.0,
-            "ratio_Mx": ratio_Mx * 100.0,
-            "ratio_My": ratio_My * 100.0,
-            "ratio_V": ratio_V * 100.0,
-            "ratio_delta": ratio_delta * 100.0,
-            "M_rd_x": M_rd_x,
-            "M_rd_y": M_rd_y,
-            "V_rd": V_rd,
-            "N_rd_trac": N_rd_trac,
-            "N_rd_comp": N_rd_comp,
-            "chi": chi,
-            "esbeltez_max": esbeltez_max,
-            "Ne": Ne,
-            "lambda_0": lambda_0,
-            "rx": rx,
-            "ry": ry,
-            "delta_lim_mm": delta_lim_mm
+            "perfil": nome_perfil, "familia": perfil["familia"], "aprovado": taxa_maxima <= 1.0,
+            "taxa_maxima": taxa_maxima * 100.0, "taxa_interacao": taxa_interacao * 100.0,
+            "ratio_N": ratio_N_max * 100.0, "ratio_N_trac": ratio_N_trac * 100.0, "ratio_N_comp": ratio_N_comp * 100.0,
+            "ratio_Mx": ratio_Mx * 100.0, "ratio_My": ratio_My * 100.0, "ratio_V": ratio_V * 100.0, "ratio_delta": ratio_delta * 100.0,
+            "M_rd_x": M_rd_x, "M_rd_y": M_rd_y, "V_rd": V_rd, "N_rd_trac": N_rd_trac, "N_rd_comp": N_rd_comp,
+            "chi": chi, "esbeltez_max": esbeltez_max, "Ne": Ne, "lambda_0": lambda_0, "rx": rx, "ry": ry, "delta_lim_mm": delta_lim_mm
         }
 
-# =========================================================================================
-# FUNÇÕES DE INTERFACE E RELATÓRIO
-# =========================================================================================
+def desenhar_secao_transversal(nome_perfil):
+    p = CATALOGO_COMPLETO.get(nome_perfil)
+    if not p: return None
+    
+    d, bf, tw, tf = p['d'], p['bf'], p['tw'], p['tf']
+    fam = p['familia']
+    fig = go.Figure()
+    
+    if "W" in fam or "I" in fam or "Castelada" in fam:
+        x_poly = [-bf/2, bf/2, bf/2, tw/2, tw/2, bf/2, bf/2, -bf/2, -bf/2, -tw/2, -tw/2, -bf/2, -bf/2]
+        y_poly = [d/2, d/2, d/2-tf, d/2-tf, -d/2+tf, -d/2+tf, -d/2, -d/2, -d/2+tf, -d/2+tf, d/2-tf, d/2-tf, d/2]
+        fig.add_trace(go.Scatter(x=x_poly, y=y_poly, fill="toself", line_color="royalblue", name=nome_perfil))
+    elif "U" in fam:
+        if "Enrijecido" in fam:
+            c = 15.0 if '15' in nome_perfil else 17.0
+            x_poly = [-bf/2, bf/2, bf/2, bf/2-tw, bf/2-tw, -bf/2+tw, -bf/2+tw, bf/2-tw, bf/2-tw, bf/2, bf/2, -bf/2, -bf/2]
+            y_poly = [d/2, d/2, d/2-c, d/2-c, d/2-tf, d/2-tf, -d/2+tf, -d/2+tf, -d/2+c, -d/2+c, -d/2, -d/2, d/2]
+        else:
+            x_poly = [-bf/2, bf/2, bf/2, -bf/2+tw, -bf/2+tw, bf/2, bf/2, -bf/2, -bf/2]
+            y_poly = [d/2, d/2, d/2-tf, d/2-tf, -d/2+tf, -d/2+tf, -d/2, -d/2, d/2]
+        fig.add_trace(go.Scatter(x=x_poly, y=y_poly, fill="toself", line_color="seagreen", name=nome_perfil))
+    elif "Cantoneira" in fam:
+        if "Dupla" in fam:
+            x_poly = [-bf, bf, bf, tw, tw, -tw, -tw, -bf, -bf]
+            y_poly = [-d/2+tf, -d/2+tf, -d/2, -d/2, d/2, d/2, -d/2, -d/2, -d/2+tf]
+        else:
+            x_poly = [0, bf, bf, tw, tw, 0, 0]
+            y_poly = [0, 0, tf, tf, d, d, 0]
+        fig.add_trace(go.Scatter(x=x_poly, y=y_poly, fill="toself", line_color="darkorange", name=nome_perfil))
+        
+    fig.update_layout(
+        title=f"Secção Geométrica 2D: {nome_perfil}<br><sup>d={d:.1f}mm | bf={bf:.1f}mm | tw={tw:.1f}mm | tf={tf:.1f}mm</sup>",
+        xaxis=dict(scaleanchor="y", scaleratio=1, showgrid=False, zeroline=True, visible=False),
+        yaxis=dict(showgrid=False, zeroline=True, visible=False),
+        showlegend=False, width=400, height=400, margin=dict(l=10, r=10, t=50, b=10),
+        plot_bgcolor='white', paper_bgcolor='white'
+    )
+    return fig
 
 def get_section_data(perfil_nome):
     p = CATALOGO_COMPLETO.get(perfil_nome)
     if not p: return [], []
-    d = p['d'] / 1000.0
-    bf = p['bf'] / 1000.0
-    fam = p['familia']
-    
+    d, bf, fam = p['d'] / 1000.0, p['bf'] / 1000.0, p['familia']
     lines = [] 
     if "W" in fam or "I" in fam or "Castelada" in fam:
-        lines.append((0, d/2, 0, -d/2)) 
-        lines.append((-bf/2, d/2, bf/2, d/2)) 
-        lines.append((-bf/2, -d/2, bf/2, -d/2)) 
+        lines.extend([(0, d/2, 0, -d/2), (-bf/2, d/2, bf/2, d/2), (-bf/2, -d/2, bf/2, -d/2)]) 
         extremos = [(0, d/2), (0, -d/2), (-bf/2, d/2), (bf/2, d/2), (-bf/2, -d/2), (bf/2, -d/2)]
     elif "U" in fam:
-        lines.append((-bf/2, d/2, -bf/2, -d/2)) 
-        lines.append((-bf/2, d/2, bf/2, d/2)) 
-        lines.append((-bf/2, -d/2, bf/2, -d/2)) 
+        lines.extend([(-bf/2, d/2, -bf/2, -d/2), (-bf/2, d/2, bf/2, d/2), (-bf/2, -d/2, bf/2, -d/2)]) 
         extremos = [(-bf/2, d/2), (-bf/2, -d/2), (bf/2, d/2), (bf/2, -d/2)]
     elif "Cantoneira" in fam:
         if "Dupla" in fam:
-            lines.append((0, d/2, 0, -d/2)) 
-            lines.append((-bf/2, d/2, bf/2, d/2)) 
+            lines.extend([(0, d/2, 0, -d/2), (-bf/2, d/2, bf/2, d/2)]) 
             extremos = [(0, -d/2), (-bf/2, d/2), (bf/2, d/2)]
         else:
-            lines.append((-bf/2, d/2, -bf/2, -d/2)) 
-            lines.append((-bf/2, -d/2, bf/2, -d/2)) 
+            lines.extend([(-bf/2, d/2, -bf/2, -d/2), (-bf/2, -d/2, bf/2, -d/2)]) 
             extremos = [(-bf/2, d/2), (-bf/2, -d/2), (bf/2, -d/2)]
     else:
-        lines.append((0, d/2, 0, -d/2))
-        lines.append((-bf/2, 0, bf/2, 0))
+        lines.extend([(0, d/2, 0, -d/2), (-bf/2, 0, bf/2, 0)])
         extremos = [(0, d/2), (0, -d/2), (-bf/2, 0), (bf/2, 0)]
-        
     return lines, extremos
 
-def desenhar_diagrama(res, tipo_diagrama):
+def desenhar_diagrama(res, tipo_diagrama, vista_camera="iso"):
     fig = go.Figure()
     nos, barras, esforcos = res["nos"], res["barras"], res["esforcos"]
     
-    if tipo_diagrama == "Deslocamentos (Deformada)":
+    if tipo_diagrama == "Geometria (Apenas Linhas)":
+        for b_info in barras:
+            n1, n2 = b_info['n1'], b_info['n2']
+            x1, y1, z1 = nos[n1]
+            x2, y2, z2 = nos[n2]
+            fig.add_trace(go.Scatter3d(x=[x1, x2], y=[y1, y2], z=[z1, z2], mode='lines', line=dict(color='black', width=4), showlegend=False))
+            
+    elif tipo_diagrama == "Deslocamentos (Deformada)":
         for b_info in barras:
             n1, n2 = b_info['n1'], b_info['n2']
             x1, y1, z1 = nos[n1]
@@ -541,7 +475,6 @@ def desenhar_diagrama(res, tipo_diagrama):
             if max_disp > 1e-6:
                 dim_max = max(np.max(coords_arr[:, 0]), np.max(coords_arr[:, 1]), np.max(coords_arr[:, 2]))
                 scale = (dim_max * 0.1) / max_disp 
-
             for b_info in barras:
                 n1, n2 = b_info['n1'], b_info['n2']
                 x1 = nos[n1][0] + U[n1*6] * scale
@@ -550,7 +483,6 @@ def desenhar_diagrama(res, tipo_diagrama):
                 x2 = nos[n2][0] + U[n2*6] * scale
                 y2 = nos[n2][1] + U[n2*6+1] * scale
                 z2 = nos[n2][2] + U[n2*6+2] * scale
-                
                 fig.add_trace(go.Scatter3d(x=[x1, x2], y=[y1, y2], z=[z1, z2], mode='lines', line=dict(color='red', width=5), showlegend=False))
 
     elif tipo_diagrama == "Reações de Apoio":
@@ -559,7 +491,6 @@ def desenhar_diagrama(res, tipo_diagrama):
             x1, y1, z1 = nos[n1]
             x2, y2, z2 = nos[n2]
             fig.add_trace(go.Scatter3d(x=[x1, x2], y=[y1, y2], z=[z1, z2], mode='lines', line=dict(color='lightgrey', width=2), showlegend=False))
-            
         rx, ry, rz, texts = [], [], [], []
         for no_idx, reac in res["reacoes"].items():
             x, y, z = nos[no_idx]
@@ -667,10 +598,7 @@ def desenhar_diagrama(res, tipo_diagrama):
             ox1, oy1, oz1 = x1 + nx*v1*escala, y1 + ny*v1*escala, z1 + nz*v1*escala
             ox2, oy2, oz2 = x2 + nx*v2*escala, y2 + ny*v2*escala, z2 + nz*v2*escala
             
-            fig.add_trace(go.Scatter3d(
-                x=[x1, ox1, ox2, x2], y=[y1, oy1, oy2, y2], z=[z1, oz1, oz2, z2],
-                mode='lines', line=dict(color=cor, width=3), showlegend=False
-            ))
+            fig.add_trace(go.Scatter3d(x=[x1, ox1, ox2, x2], y=[y1, oy1, oy2, y2], z=[z1, oz1, oz2, z2], mode='lines', line=dict(color=cor, width=3), showlegend=False))
             
             t_x, t_y, t_z, t_val = [], [], [], []
             if abs(v1) > 0.1:
@@ -681,11 +609,7 @@ def desenhar_diagrama(res, tipo_diagrama):
                 t_x.append(ox2); t_y.append(oy2); t_z.append(oz2); t_val.append(f"{v2:.1f}")
 
             if t_x:
-                fig.add_trace(go.Scatter3d(
-                    x=t_x, y=t_y, z=t_z,
-                    mode='text', text=t_val, textposition="top center",
-                    textfont=dict(color=cor, size=11, family="Arial Black"), showlegend=False
-                ))
+                fig.add_trace(go.Scatter3d(x=t_x, y=t_y, z=t_z, mode='text', text=t_val, textposition="top center", textfont=dict(color=cor, size=11, family="Arial Black"), showlegend=False))
 
         if "Normal" in tipo_diagrama:
             fig.add_trace(go.Scatter3d(x=[None], y=[None], z=[None], mode='lines', line=dict(color='royalblue', width=4), name='Tração (+)'))
@@ -697,17 +621,26 @@ def desenhar_diagrama(res, tipo_diagrama):
             
         fig.update_layout(showlegend=True, legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01, bgcolor="rgba(255,255,255,0.7)"))
 
+    # Controlo de Camaras Ortogonais (Geometria 2D vs 3D Isometrica)
+    if vista_camera == "frontal":
+        fig.update_layout(scene_camera=dict(up=dict(x=0, y=0, z=1), center=dict(x=0, y=0, z=0), eye=dict(x=0, y=-2.0, z=0), projection=dict(type="orthographic")))
+    elif vista_camera == "superior":
+        fig.update_layout(scene_camera=dict(up=dict(x=0, y=1, z=0), center=dict(x=0, y=0, z=0), eye=dict(x=0, y=0, z=2.0), projection=dict(type="orthographic")))
+    elif vista_camera == "lateral":
+        fig.update_layout(scene_camera=dict(up=dict(x=0, y=0, z=1), center=dict(x=0, y=0, z=0), eye=dict(x=2.0, y=0, z=0), projection=dict(type="orthographic")))
+
     fig.update_layout(scene=dict(xaxis_title='X (m)', yaxis_title='Y (m)', zaxis_title='Z (m)', aspectmode='data'), margin=dict(l=0, r=0, b=0, t=0), height=600)
     return fig
+
+# =========================================================================================
+# GERADORES DE RELATÓRIO
+# =========================================================================================
 
 def gerar_relatorio_txt(dados, res_analise, resultados_comp, tudo_aprovado, tolerancia):
     data_atual = datetime.now().strftime("%d/%m/%Y às %H:%M")
     status_global = "APROVADA" if tudo_aprovado else "REPROVADA (Requer revisão de perfis)"
-    
     aco = PROPRIEDADES_ACO[dados['tipo_aco']]
-    fy_mpa = aco['fy']
-    fy_kncm2 = fy_mpa / 10.0
-    gamma_a1 = 1.10
+    fy_mpa, fy_kncm2, gamma_a1 = aco['fy'], aco['fy'] / 10.0, 1.10
     
     relatorio = f"""=========================================================
       MEMÓRIA DE CÁLCULO ESTRUTURAL DETALHADA
@@ -724,7 +657,6 @@ Tolerância de Aprovação Aplicada: +{tolerancia:.1f}%
 """
     if dados['sistema_principal'] != "Mão Francesa / Suporte (Plano 2D)":
         relatorio += f"- Tipo de Pilar: {dados['tipo_pilar']}\n"
-
     relatorio += f"""- Vão Transversal (X): {dados['vao_x']:.2f} m
 - Altura (Z): {dados['altura_z']:.2f} m
 - Largura de Influência / Espaçamento: {dados['espacamento']:.2f} m
@@ -732,8 +664,7 @@ Tolerância de Aprovação Aplicada: +{tolerancia:.1f}%
     if dados['sistema_principal'] not in ["Mão Francesa / Suporte (Plano 2D)"]:
         relatorio += f"- Comprimento Longitudinal (Y): {dados['comp_y']:.2f} m\n"
         if dados['sistema_principal'] == "Mezanino / Passarela Metálica":
-            relatorio += f"- Espaçamento entre Vigotas Transversais: {dados['espacamento_vigota']:.2f} m\n"
-            relatorio += f"- Tipo de Piso: {dados['tipo_piso']}\n"
+            relatorio += f"- Espaçamento entre Vigotas Transversais: {dados['espacamento_vigota']:.2f} m\n- Tipo de Piso: {dados['tipo_piso']}\n"
 
     relatorio += f"""
 2. CARGAS DE PROJETO (ELU - NBR 6120 / NBR 8800)
@@ -770,8 +701,7 @@ Coeficiente de Minoração (γ_a1) = {gamma_a1}
 """
     for v in resultados_comp:
         perf = CATALOGO_COMPLETO[v['perfil']]
-        A, Wx = perf['A'], perf['Wx']
-        Wy = perf.get('Wy', 0.1)
+        A, Wx, Wy = perf['A'], perf['Wx'], perf.get('Wy', 0.1)
         d, tw = perf['d'] / 10.0, perf['tw'] / 10.0
         Av = d * tw
         status_comp = "APROVADO (COM TOLERÂNCIA)" if v['aprovado'] and v['taxa_maxima'] > 100.0 else ("APROVADO" if v['aprovado'] else "REPROVADO")
@@ -799,46 +729,85 @@ Coeficiente de Minoração (γ_a1) = {gamma_a1}
         relatorio += f"  >> STATUS DA PEÇA: {status_comp} (Taxa Máxima: {v.get('taxa_maxima', 0.0):.1f}%)\n.........................................................\n\n"
     return relatorio
 
-def gerar_relatorio_pdf(texto_memoria, res_analise=None, incluir_graficos=False):
+def gerar_relatorio_pdf_avancado(dados, res_analise, resultados_comp, incluir_graficos=True):
     if FPDF is None: return None
     pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    
+    # 1. Capa e Texto Padrão
+    texto = gerar_relatorio_txt(dados, res_analise, resultados_comp, True, 2.0)
     pdf.add_page()
     pdf.set_font("Courier", size=9) 
-    for linha in texto_memoria.split('\n'):
+    for linha in texto.split('\n'):
         pdf.multi_cell(0, 5, txt=linha.encode('latin-1', 'replace').decode('latin-1'))
         
-    if res_analise and incluir_graficos:
-        try:
-            pdf.add_page()
-            pdf.set_font("Courier", 'B', 12)
-            pdf.cell(0, 10, "6. ANEXO - DIAGRAMAS 3D/2D", ln=True)
-            pdf.set_font("Courier", size=9)
+    if incluir_graficos and res_analise:
+        # 2. Vistas Geométricas da Estrutura
+        pdf.add_page()
+        pdf.set_font("Courier", 'B', 12)
+        pdf.cell(0, 10, "6. ANEXO A - VISTAS GEOMETRICAS DA ESTRUTURA", ln=True)
+        pdf.set_font("Courier", size=9)
+        
+        vistas = [
+            ("Vista Isometrica 3D", "iso"),
+            ("Vista Frontal (Plano XZ)", "frontal"),
+            ("Vista Superior (Plano XY)", "superior"),
+            ("Vista Lateral (Plano YZ)", "lateral")
+        ]
+        
+        for nome_vista, cam in vistas:
+            fig = desenhar_diagrama(res_analise, "Geometria (Apenas Linhas)", cam)
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp:
+                fig.write_image(tmp.name, width=800, height=450)
+                pdf.cell(0, 10, f"-> {nome_vista}:", ln=True)
+                pdf.image(tmp.name, x=10, w=190)
+                tmp_path = tmp.name
+            if os.path.exists(tmp_path): os.unlink(tmp_path)
             
-            diagramas = ["Deslocamentos (Deformada)", "Momento Fletor (My)", "Reações de Apoio"]
+        # 3. Diagramas de Esforços Globais
+        pdf.add_page()
+        pdf.set_font("Courier", 'B', 12)
+        pdf.cell(0, 10, "7. ANEXO B - DIAGRAMAS DE ESFORCOS", ln=True)
+        pdf.set_font("Courier", size=9)
+        
+        diagramas = ["Deslocamentos (Deformada)", "Esforço Normal (Tração/Compressão)", "Momento Fletor (My)", "Reações de Apoio"]
+        for diag in diagramas:
+            fig = desenhar_diagrama(res_analise, diag, "iso")
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp:
+                fig.write_image(tmp.name, width=800, height=450)
+                pdf.cell(0, 10, f"-> {diag}:", ln=True)
+                pdf.image(tmp.name, x=10, w=190)
+                tmp_path = tmp.name
+            if os.path.exists(tmp_path): os.unlink(tmp_path)
             
-            for diag in diagramas:
-                fig = desenhar_diagrama(res_analise, diag)
-                fig.update_layout(paper_bgcolor='white', plot_bgcolor='white')
-                
+        # 4. Desenho das Seções Transversais Individuais
+        pdf.add_page()
+        pdf.set_font("Courier", 'B', 12)
+        pdf.cell(0, 10, "8. ANEXO C - GEOMETRIA DETALHADA DAS SECOES", ln=True)
+        pdf.set_font("Courier", size=9)
+        
+        perfis_desenhados = set()
+        for v in resultados_comp:
+            nome_perfil = v['perfil']
+            if nome_perfil in perfis_desenhados: continue
+            perfis_desenhados.add(nome_perfil)
+            
+            fig_sec = desenhar_secao_transversal(nome_perfil)
+            if fig_sec:
                 with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp:
-                    fig.write_image(tmp.name, width=800, height=600)
-                    pdf.cell(0, 10, f"-> {diag}:", ln=True)
-                    pdf.image(tmp.name, x=10, w=190)
+                    fig_sec.write_image(tmp.name, width=400, height=400)
                     pdf.ln(5)
+                    pdf.cell(0, 10, f"Geometria 2D do Perfil Aplicado: {nome_perfil} ({v['componente']})", ln=True)
+                    pdf.image(tmp.name, x=50, w=100)
                     tmp_path = tmp.name
-                
-                if os.path.exists(tmp_path):
-                    os.unlink(tmp_path)
-                    
-        except Exception as e:
-            pdf.multi_cell(0, 5, txt=f"\n[Aviso: Não foi possível gerar os diagramas no PDF. Servidor sem suporte ao 'kaleido' ou timeout. Detalhe: {e}]")
+                if os.path.exists(tmp_path): os.unlink(tmp_path)
 
     out = pdf.output(dest='S')
     return out.encode('latin-1') if isinstance(out, str) else bytes(out)
 
-def obter_propriedades(nome_perfil):
-    p = CATALOGO_COMPLETO[nome_perfil]
-    return {"A": p["A"] * 1e-4, "Iy": p["Ix"] * 1e-8, "Iz": p["Iy"] * 1e-8, "J": (p["Iy"] * 1e-8) / 2.0}
+# =========================================================================================
+# FUNÇÃO PRINCIPAL UI STREAMLIT
+# =========================================================================================
 
 def main():
     st.title("🏗️ Dimensionamento de Estruturas Metálicas")
@@ -1107,7 +1076,7 @@ def main():
 
     with tab4:
         st.subheader("✅ Verificação Biaxial Integrada e Flambagem (NBR 8800)")
-        if not st.session_state.res_analise: st.warning("Execute a Análise na Aba 3.")
+        if not st.session_state.res_analise: st.warning("Execute a Análise na Aba 3 para habilitar as verificações.")
         elif not st.session_state.res_analise.get("sucesso"): st.error("A análise falhou.")
         else:
             res = st.session_state.res_analise
@@ -1164,15 +1133,26 @@ def main():
                     "g_total": g_total, "q_sobre": q_sobre, "q_elu": q_elu, "tipo_aco": tipo_aco, 
                     "q_vento_liquido": q_vento_liquido, "tipo_piso": tipo_piso if sistema_principal == "Mezanino / Passarela Metálica" else "N/A"
                 }
-                texto_memoria = gerar_relatorio_txt(dados_r, res, resultados_comp, tudo_aprovado, tolerancia_aceitacao)
                 
-                col_d1, col_d2, col_d3 = st.columns([1.5, 1.5, 2])
-                with col_d1: st.download_button("📄 Baixar TXT", data=texto_memoria, file_name="Calculo.txt")
-                with col_d2:
-                    if FPDF is not None:
-                        incluir_img = col_d3.checkbox("Anexar Imagens 3D no PDF (Pode causar erro/lentidão na nuvem)")
-                        st.download_button("📥 Baixar PDF", data=gerar_relatorio_pdf(texto_memoria, res, incluir_img), file_name="Calculo_Detalhado.pdf", mime="application/pdf", type="primary")
-
+                # NOVO MENU DE GERAÇÃO DO PDF EXTREMO
+                st.subheader("📑 Gerador do Memorial de Cálculo Definitivo (PDF)")
+                st.info("Este gerador irá desenhar todas as vistas 2D (Frontal, Lateral, Superior), os diagramas globais e a geometria de secção transversal para cada peça individual. Pode demorar cerca de 15 a 30 segundos.")
+                
+                if FPDF is not None:
+                    if st.button("⚙️ Processar Relatório Gráfico PDF", type="primary"):
+                        with st.spinner("A renderizar as plantas, diagramas e vistas 2D... Aguarde."):
+                            pdf_bytes = gerar_relatorio_pdf_avancado(dados_r, res, resultados_comp, True)
+                            st.session_state['pdf_pronto'] = pdf_bytes
+                            st.success("✅ Relatório renderizado com sucesso!")
+                    
+                    if st.session_state.get('pdf_pronto'):
+                        st.download_button(
+                            label="📥 Descarregar Memorial Completo (PDF)",
+                            data=st.session_state['pdf_pronto'],
+                            file_name=f"Memorial_{nome_projeto.replace(' ', '_')}.pdf",
+                            mime="application/pdf"
+                        )
+                
                 st.markdown("---")
                 for v in resultados_comp:
                     st.write(f"#### 🔹 {v['componente']} — `{v['perfil']}`")
